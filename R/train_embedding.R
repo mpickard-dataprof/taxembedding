@@ -2,18 +2,32 @@ source("R/process_corpus.R")
 
 library(dplyr)
 library(fs)
+library(readr)
 
 generateEmbeddings <- function() {
 
   library(tidyr)
   library(furrr)
+  library(purrr)
 
-  plan(multiprocess)
+  num_cores <- availableCores() / 2
+  plan(multiprocess, workers = num_cores)
+
+  ## check if 'corpi' and 'embeddings' directories exists
+  ## if not, create them
+  if (!dir_exists("./data/corpi")) {
+    cat("'corpi' directory does not exist. Creating it...\n")
+    dir_create("./data/corpi")
+  }
+
+  if (!dir_exists("./data/embeddings")) {
+    cat("'embeddings' directory does not exist. Creating it...\n")
+    dir_create("./data/embeddings")
+  }
 
   ## Corpus hyperparameters here
   remove_stopwords <- c(TRUE, FALSE)
   preserve_code_references <- c(TRUE, FALSE)
-
 
   ## embedding hyperparameters here
   type <- c("word2vec", "fasttext")
@@ -38,15 +52,16 @@ generateEmbeddings <- function() {
 
   ## from each corpus generate N word embeddings, where N is the number of
   ## combinations of the embedding hyperparameters
-
-
   embed_param_df <- embed_param_df %>%
     pmap_dfr(train_gensim_wv)
 
-  return(
-    expand_grid(corpus_param_df,
-                embed_param_df)
-  )
+  embedding_df <-  expand_grid(corpus_param_df, embed_param_df)
+
+  cat("Generated all embeddings. Saving tibble with information...\n")
+
+  write_csv2(embedding_df, "./data/corpus_info.csv")
+
+  return(embedding_df)
 
 }
 
@@ -60,15 +75,17 @@ generate_corpus <- function(remove_stopwords, preserve_code_references) {
 
   corpus_path <- file.path("data/corpi", filename)
 
+  cat("Generating corpus '", filename, "'...\n")
+
   if (file_exists(corpus_path)) {
 
-    print("Corpus already exists on disk.")
-    # corpus <- readRDS(corpus_path)
+    cat("Corpus already exists on disk.\n")
 
   } else {
 
     cat(corpus_path, ": Creating corpus...\n")
-    ## load the corpus from disk
+
+    ## load the raw corpus from disk
     corpus <- load_corpus()
 
     ## accepting defaults to preserve currency and percent phrases and not preserve ngrams
@@ -79,10 +96,7 @@ generate_corpus <- function(remove_stopwords, preserve_code_references) {
     corpus <-
       tokenize_corpus(corpus, remove_stopwords = remove_stopwords)
 
-
     saveRDS(corpus, corpus_path)
-
-
   }
 
   # invisible(corpus)
@@ -126,6 +140,8 @@ train_gensim_wv <- function(corpuspath,
     epochs,
     sep = "_"
   )
+
+  cat("Training '", embed_name, "'...\n")
 
   embed_path <- file.path("data/embeddings", embed_name)
 

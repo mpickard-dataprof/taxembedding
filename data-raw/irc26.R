@@ -17,7 +17,7 @@ download_irc26 <- function() {
 }
 
 
-extract_irc26 <- function(removeNotes = TRUE, removeTOC = TRUE, force_refresh = FALSE) {
+extract_irc26 <- function(removeNotes = TRUE, removeTOC = TRUE) {
 
   ### NOTE: I believe 'use_data()' sets up lazy loading of these data sets.
   ### So, no need to explicitly load them. They are saved by 'use_data()'
@@ -33,9 +33,11 @@ extract_irc26 <- function(removeNotes = TRUE, removeTOC = TRUE, force_refresh = 
   raw_file_path <- file.path("data-raw", "usc26.xml")
 
   if (!file_exists(raw_file_path)) {
-    download_ecfr26()
+    message("downloading usc26xml.zip...")
+    download_irc26()
   }
 
+  message("reading usc26.xml...")
   xml <- read_xml(raw_file_path)
 
   ## Some <section> nodes are contained inside <notes>
@@ -50,6 +52,8 @@ extract_irc26 <- function(removeNotes = TRUE, removeTOC = TRUE, force_refresh = 
   ## strokes with our word embedding. Need to check if removing notes and toc
   ## makes a difference. Can fine tune later.
   if (removeNotes) {
+
+    message("removing IRC notes...")
 
     ## Based on USLM User Guide section 7.7, the following nodes derive from
     ## <note>: <sourceCredit>, <statutoryNote>, <editorialNote>, and <changeNote>.
@@ -73,6 +77,8 @@ extract_irc26 <- function(removeNotes = TRUE, removeTOC = TRUE, force_refresh = 
 
   if (removeTOC) {
 
+    message("removing IRC table of content items...")
+
     ## asserted that all <tocItem> nodes were inside <toc> nodes,
     ## so just removing <toc>
     toc <- xml_find_all(xml, "//d1:toc", ns = xml_ns(xml))
@@ -95,6 +101,7 @@ extract_irc26 <- function(removeNotes = TRUE, removeTOC = TRUE, force_refresh = 
 
   # if we just use xml_text() to retrieve the text (i.e. remove xml tags), it does not put spaces between the text of the
   # different subnodes. So we have to select all the text nodes individually and then paste them together with a space.
+  message("extracting IRC text...")
   extract_text_from_node <- function(node) {
     require(xml2)
     text_nodes <- xml_find_all(node, ".//text()")
@@ -104,6 +111,7 @@ extract_irc26 <- function(removeNotes = TRUE, removeTOC = TRUE, force_refresh = 
 
   irc26 <- sapply(sections, extract_text_from_node)
   # saveRDS(irc26, "data/cleaned_irc26.rds")
+  message("saving irc26.rda...")
   usethis::use_data(irc26, overwrite = TRUE)
   invisible(irc26)
 

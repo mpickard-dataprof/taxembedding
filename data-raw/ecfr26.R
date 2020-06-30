@@ -12,7 +12,7 @@ download_ecfr26 <- function() {
 
 }
 
-extract_ecfr26 <- function(removeNotes = TRUE, removeTOC = TRUE, force_refresh = FALSE) {
+extract_ecfr26 <- function(removeNotes = TRUE, removeTOC = TRUE) {
 
   ### NOTE: I believe 'use_data()' sets up lazy loading of these data sets.
   ### So, no need to explicitly load them. They are saved by 'use_data()'
@@ -28,9 +28,11 @@ extract_ecfr26 <- function(removeNotes = TRUE, removeTOC = TRUE, force_refresh =
   raw_file_path <- file.path("data-raw", "ecfr26.xml")
 
   if (!file_exists(raw_file_path)) {
+    message("downloading ecfr26.xml...")
     download_ecfr26()
   }
 
+  message("reading ecfr26.xml...")
   xml <- read_xml(raw_file_path)
 
   ## eCFR has 22 volumes.
@@ -46,11 +48,12 @@ extract_ecfr26 <- function(removeNotes = TRUE, removeTOC = TRUE, force_refresh =
   ## parts that should be left in.
 
   ## Also, the eCFR XML document does not use namespaces
-
+  message('extracting nodes from ecfr26...')
   sections <- xml_find_all(xml, "//DIV8")
 
   # if we just use xml_text() to retrieve the text (i.e. remove xml tags), it does not put spaces between the text of the
   # different subnodes. So we have to select all the text nodes individually and then paste them together with a space.
+  message('extracting text from ecfr26...')
   extract_text_from_node <- function(node) {
     require(xml2)
     text_nodes <- xml_find_all(node, ".//text()")
@@ -60,6 +63,7 @@ extract_ecfr26 <- function(removeNotes = TRUE, removeTOC = TRUE, force_refresh =
 
   ecfr26 <- sapply(sections, extract_text_from_node)
   # saveRDS(ecfr26, "data/cleaned_ecfr26.rds")
+  message('saving ecfr26.rda...')
   usethis::use_data(ecfr26, overwrite = TRUE)
   invisible(ecfr26)
 
