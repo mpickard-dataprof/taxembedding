@@ -278,6 +278,77 @@ replace_references <- function(line)
 }
 
 
+# helper function for str_replace_all call in preserve_ngrams_in_corpus.
+# It replaces spaces with underscores inside the match
+join_ngram <- function(line) {
+  return (
+    line %>% str_replace_all("[:blank:]", "_")
+  )
+}
+
+# helper function to paste each ngram size together
+create_ngram_regex <- function(df, ngram_size) {
+  return (
+    df %>% filter(size == ngram_size) %>% pull(ngram) %>% str_c(collapse = "|")
+  )
+}
+
+
+# helper function to split corpus into equal parts
+chunk_vector <- function(x,n) {
+  split(x, cut(seq_along(x), n, labels = FALSE))
+}
+
+
+
+preserve_ngrams_in_corpus <- function(corpus) {
+
+  library(readr)
+  library(stringr)
+  library(furrr)
+  library(parallel)
+
+  plan(multiprocess)
+
+  # load list ngrams to preserve
+  if (!exists("tax_ngrams")) {
+    tax_ngrams <- read_csv(
+      "data/csv_output/ngram_counts.csv",
+      col_types = cols(
+        ngram = col_character(),
+        size = col_integer(),
+        n = col_integer()
+      )
+    )
+  }
+
+  # assemble the regex pattern--largest ngrams first
+  # the ngrams were generated empirically with other code, basically
+  # selected ngrams that occur most frequently.
+  if (!exists("ngram_patterns")) {
+    sizes <- rev(unique(tax_ngrams$size))
+    ngram_patterns <-
+      map_chr(sizes, create_ngram_regex, df = tax_ngrams)
+    ngram_patterns <- str_c(ngram_patterns, collapse = "|")
+  }
+
+  # chunk the corpus based on number of available cores
+  # numCores <- detectCores()
+  numCores <- 8L
+  corpus_chunks <- chunk_vector(corpus, numCores)
+
+  replace_ngram_in_chunk <- function(chunk, pattern) {
+    chunk_list <- map(chunk, str_replace_all, pattern, replacement = join_ngram)
+    invisible(
+      unlist(unname(chunk_list))
+    )
+  }
+
+  corpus <- future_map(corpus_chunks, replace_ngram_in_chunk, pattern = ngram_patterns)
+
+  invisible (unname(unlist(corpus)))
+}
+
 
 ## PURPOSE: Find and replace things that that will otherwise be ripped apart
 ## by the tokenizer.
@@ -286,7 +357,7 @@ replace_references <- function(line)
 prepare_corpus <- function(corpus,
                         preserve_currency = TRUE,
                         preserve_percent = TRUE,
-                        preserve_ngrams = FALSE,
+                        preserve_ngrams = TRUE,
                         preserve_references = TRUE) {
 
   if (preserve_currency) {
@@ -295,6 +366,10 @@ prepare_corpus <- function(corpus,
 
   if (preserve_percent) {
     corpus <- preserve_percent_references(corpus)
+  }
+
+  if (preserve_ngrams) {
+    corpus <- preserve_ngrams_in_corpus(corpus)
   }
 
   if (preserve_references) {
