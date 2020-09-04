@@ -1,4 +1,5 @@
 source("R/process_corpus.R")
+source("R/load_corpus.R")
 
 library(dplyr)
 library(fs)
@@ -9,6 +10,8 @@ generateEmbeddings <- function() {
   library(tidyr)
   library(furrr)
   library(purrr)
+  plan(multiprocess)
+
 
   num_cores <- availableCores() / 2
   plan(multiprocess, workers = num_cores)
@@ -27,16 +30,17 @@ generateEmbeddings <- function() {
 
   ## Corpus hyperparameters here
   remove_stopwords <- c(TRUE, FALSE)
-  preserve_code_references <- c(TRUE, FALSE)
+  preserve_code_references <- c(FALSE)
+  preserve_ngrams <- c(FALSE)
 
   ## embedding hyperparameters here
-  type <- c("word2vec", "fasttext")
-  dimensions <- c(128L, 256L, 512L)
-  window <- c(4L, 10L)
+  type <- c("word2vec")
+  dimensions <- c(128L)
+  window <- c(4L)
   min_word_occur <- c(5L)
   epochs = c(5L)
 
-  corpus_param_df <- expand_grid(remove_stopwords, preserve_code_references)
+  corpus_param_df <- expand_grid(remove_stopwords, preserve_code_references, preserve_ngrams)
 
 
   ## this generates the corpus permutations and saves them to disk
@@ -55,23 +59,25 @@ generateEmbeddings <- function() {
   embed_param_df <- embed_param_df %>%
     pmap_dfr(train_gensim_wv)
 
-  embedding_df <-  expand_grid(corpus_param_df, embed_param_df)
+
 
   cat("Generated all embeddings. Saving tibble with information...\n")
+  embedding_df <- expand_grid(corpus_param_df, embed_param_df)
 
   write_csv2(embedding_df, "./data/corpus_info.csv")
 
   return(embedding_df)
 
-}
+  }
 
 
 ## this function generates different versions of the corpus based on
 ## whether the user wants stopwords removed, preserve irc refs, etc.
-generate_corpus <- function(remove_stopwords, preserve_code_references) {
+generate_corpus <- function(remove_stopwords, preserve_code_references, preserve_ngrams) {
 
   filename <-  paste0("sw-", str_sub(tolower(!remove_stopwords), 1, 1),
-                      "_refs-", str_sub(tolower(preserve_code_references), 1, 1))
+                      "_refs-", str_sub(tolower(preserve_code_references), 1, 1),
+                      "_ngrams-", str_sub(tolower(preserve_ngrams), 1, 1))
 
   corpus_path <- file.path("data/corpi", filename)
 
@@ -84,13 +90,12 @@ generate_corpus <- function(remove_stopwords, preserve_code_references) {
   } else {
 
     cat(corpus_path, ": Creating corpus...\n")
-
-    ## load the raw corpus from disk
+    ## load the corpus from disk
     corpus <- load_corpus()
 
     ## accepting defaults to preserve currency and percent phrases and not preserve ngrams
     corpus <-
-      prepare_corpus(corpus, preserve_references = preserve_code_references)
+      prepare_corpus(corpus, preserve_references = preserve_code_references, preserve_ngrams = preserve_ngrams)
 
     ## accepting defaults to not stem words
     corpus <-
@@ -107,7 +112,8 @@ generate_corpus <- function(remove_stopwords, preserve_code_references) {
   tibble(
     corpuspath = corpus_path,
     stopwords = !remove_stopwords,
-    code_refs = preserve_code_references
+    code_refs = preserve_code_references,
+    preserve_ngrams = preserve_ngrams
   )
 }
 
@@ -118,6 +124,7 @@ generate_corpus <- function(remove_stopwords, preserve_code_references) {
 train_gensim_wv <- function(corpuspath,
                             stopwords,
                             code_refs,
+                            preserve_ngrams,
                             type = "word2vec",
                             dimensions = 300L,
                             window = 3L,
@@ -130,6 +137,7 @@ train_gensim_wv <- function(corpuspath,
     if_else(stopwords, "sw", "nosw"),
     if_else(code_refs, "refs", "norefs"),
     if_else(type == "word2vec", "w2v", "ft"),
+    if_else(preserve_ngrams, "ngrams", "no_ngrams"),
     "d",
     dimensions,
     "w",
