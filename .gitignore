@@ -47,5 +47,5 @@ data/embeddings
 *.xml
 *.zip
 *.html
-*.csv
+# *.csv
 

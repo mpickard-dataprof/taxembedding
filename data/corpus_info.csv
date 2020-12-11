@@ -1,0 +1,5 @@
+corpuspath;stopwords;code_refs;preserve_ngrams;embedding_path;type;dimensions;window;min_word_occur;epochs;message
+data/corpi/sw-f_refs-f_ngrams-f;FALSE;FALSE;FALSE;data/embeddings/nosw_norefs_w2v_no_ngrams_d_128_w_4_mwo_5_e_5;word2vec;128;4;5;5;Success
+data/corpi/sw-f_refs-f_ngrams-f;FALSE;FALSE;FALSE;data/embeddings/sw_norefs_w2v_no_ngrams_d_128_w_4_mwo_5_e_5;word2vec;128;4;5;5;Success
+data/corpi/sw-t_refs-f_ngrams-f;TRUE;FALSE;FALSE;data/embeddings/nosw_norefs_w2v_no_ngrams_d_128_w_4_mwo_5_e_5;word2vec;128;4;5;5;Success
+data/corpi/sw-t_refs-f_ngrams-f;TRUE;FALSE;FALSE;data/embeddings/sw_norefs_w2v_no_ngrams_d_128_w_4_mwo_5_e_5;word2vec;128;4;5;5;Success
