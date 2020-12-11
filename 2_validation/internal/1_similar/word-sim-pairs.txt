@@ -1,0 +1,17 @@
+calculation	computation
+development	issue
+dividend	payment
+five	month
+life	death
+life	term
+line	insurance
+money	cash
+money	currency
+money	dollar
+money	operation
+profit	loss
+report	gain
+start	year
+stock	life
+travel	activity
+type	kind
