@@ -42,6 +42,10 @@ vignettes/*.pdf
 data/corpi
 data/embeddings
 
+
+# specific files
+data/corpus_info.csv
+
 # other data files
 *.rda
 *.xml

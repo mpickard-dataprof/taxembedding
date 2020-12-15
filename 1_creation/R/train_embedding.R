@@ -1,9 +1,13 @@
-source("R/process_corpus.R")
-source("R/load_corpus.R")
+source("1_creation/R/process_corpus.R")
+source("1_creation/R/load_corpus.R")
 
 library(dplyr)
 library(fs)
 library(readr)
+
+## PATHS FOR OUTPUTS
+EMBED_PATH = '/data/rstudio/embeddings'
+CORPI_PATH = '/home/mpickard/Projects/taxembed/data/corpi'
 
 generateEmbeddings <- function() {
 
@@ -18,27 +22,33 @@ generateEmbeddings <- function() {
 
   ## check if 'corpi' and 'embeddings' directories exists
   ## if not, create them
-  if (!dir_exists("./data/corpi")) {
+  if (!dir_exists(CORPI_PATH)) {
     cat("'corpi' directory does not exist. Creating it...\n")
-    dir_create("./data/corpi")
+    dir_create(CORPI_PATH)
   }
 
-  if (!dir_exists("./data/embeddings")) {
+  if (!dir_exists(EMBED_PATH)) {
     cat("'embeddings' directory does not exist. Creating it...\n")
-    dir_create("./data/embeddings")
+    dir_create(EMBED_PATH)
   }
 
   ## Corpus hyperparameters here
   remove_stopwords <- c(TRUE, FALSE)
-  preserve_code_references <- c(FALSE)
-  preserve_ngrams <- c(FALSE)
+  preserve_code_references <- c(TRUE, FALSE)
+  preserve_ngrams <- c(TRUE, FALSE)
 
   ## embedding hyperparameters here
-  type <- c("word2vec")
-  dimensions <- c(128L)
-  window <- c(4L)
-  min_word_occur <- c(5L)
-  epochs = c(5L)
+  type <- c("word2vec", "fasttext")
+  dimensions <- c(32L, 256L)
+  # dimensions <- c(32L, 128L, 256L, 512L)
+  # dimensions <- c(32L, 64L, 96L, 128L, 192L, 256L, 512L)
+  window <- c(2L, 8L)
+  # window <- c(2L, 4L, 8L)
+  # window <- c(2L, 4L, 5L, 8L, 10L)
+  min_word_occur <- c(5L, 20L)
+  # min_word_occur <- c(5L, 20L, 50L)
+  # min_word_occur <- c(3L, 5L, 10L, 20L, 50L)
+  epochs = c(2L, 5L, 8L)
 
   corpus_param_df <- expand_grid(remove_stopwords, preserve_code_references, preserve_ngrams)
 
@@ -79,7 +89,7 @@ generate_corpus <- function(remove_stopwords, preserve_code_references, preserve
                       "_refs-", str_sub(tolower(preserve_code_references), 1, 1),
                       "_ngrams-", str_sub(tolower(preserve_ngrams), 1, 1))
 
-  corpus_path <- file.path("data/corpi", filename)
+  corpus_path <- file.path(CORPI_PATH, filename)
 
   cat("Generating corpus '", filename, "'...\n")
 
@@ -90,7 +100,7 @@ generate_corpus <- function(remove_stopwords, preserve_code_references, preserve
   } else {
 
     cat(corpus_path, ": Creating corpus...\n")
-    ## load the corpus from disk
+    ## load the raw corpus from disk
     corpus <- load_corpus()
 
     ## accepting defaults to preserve currency and percent phrases and not preserve ngrams
@@ -151,7 +161,7 @@ train_gensim_wv <- function(corpuspath,
 
   cat("Training '", embed_name, "'...\n")
 
-  embed_path <- file.path("data/embeddings", embed_name)
+  embed_path <- file.path(EMBED_PATH, embed_name)
 
   embed_info <- tibble(
     embedding_path = embed_path,
@@ -168,7 +178,8 @@ train_gensim_wv <- function(corpuspath,
     return(embed_info)
   }
 
-  numCores <- parallel::detectCores()
+  # numCores <- 8L
+  numCores <- as.integer(parallel::detectCores() / 2)
 
   if (!file_exists(corpuspath)) {
     cat("Corpus (", corpuspath, ") not found.\n")
@@ -215,18 +226,24 @@ train_gensim_wv <- function(corpuspath,
 
 
     cat("Saving ", embed_name, " embedding...\n")
-    model$save(embed_path)
-    # saveRDS(model, embed_path)
+    # pickle version 4 compresses files more, but may cause problems
+    model$save(embed_path, pickle_protocol=4)
 
   },
 
   error = function(e) {
-    embed_info$message = cat("Failure! ", e)
-    return (embed_info)
+    message("FAILURE: Training the word embedding failed!")
+    message("Here is the error message:")
+    message(e)
+    # embed_info$message = cat("Failure! ", unlist(e))
+    # return (embed_info)
   },
 
   warning = function(w) {
-    embed_info$message = cat("Warning! ", w)
+    message("WARNING: A warning occurred while training the word embedding.")
+    message("Here is the warning message:")
+    message(w)
+    # embed_info$message = cat("Warning! ", unlist(w))
   },
 
   finally = {

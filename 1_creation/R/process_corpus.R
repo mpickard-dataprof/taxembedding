@@ -313,7 +313,7 @@ preserve_ngrams_in_corpus <- function(corpus) {
   # load list ngrams to preserve
   if (!exists("tax_ngrams")) {
     tax_ngrams <- read_csv(
-      "data/output_data/ngram_counts.csv",
+      "data/ngram_counts.csv",
       col_types = cols(
         ngram = col_character(),
         size = col_integer(),
