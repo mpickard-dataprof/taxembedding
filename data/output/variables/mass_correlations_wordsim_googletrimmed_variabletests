@@ -1,0 +1,247 @@
+
+> get_tukey(variables_aov)
+$pearson
+$pearson$Stopwords
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Pearson.Correlation.Coefficient ~ Stopwords., data = df)
+
+$Stopwords.
+                  diff         lwr       upr p adj
+True-False -0.06306098 -0.08755095 -0.038571 6e-07
+
+
+$pearson$References
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Pearson.Correlation.Coefficient ~ References.Preserved., data = df)
+
+$References.Preserved.
+                   diff         lwr        upr     p adj
+True-False -0.005136662 -0.03042968 0.02015635 0.6898903
+
+
+$pearson$Algorithm
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Pearson.Correlation.Coefficient ~ Training.Algorithm, data = df)
+
+$Training.Algorithm
+                       diff       lwr       upr p adj
+Word2Vec-FastText 0.1945672 0.1785394 0.2105949     0
+
+
+$pearson$Dimensions
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Pearson.Correlation.Coefficient ~ Dimensions, data = df)
+
+$Dimensions
+              diff         lwr         upr     p adj
+32-256 -0.04680846 -0.07166464 -0.02195227 0.0002447
+
+
+$pearson$Window
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Pearson.Correlation.Coefficient ~ Window, data = df)
+
+$Window
+         diff          lwr        upr     p adj
+8-2 0.0227881 -0.002406105 0.04798231 0.0761306
+
+
+$pearson$Threshold
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Pearson.Correlation.Coefficient ~ Minimum.Count.Threshold, data = df)
+
+$Minimum.Count.Threshold
+            diff         lwr        upr     p adj
+5-20 -0.00729196 -0.03257961 0.01799569 0.5710659
+
+
+$pearson$Epochs
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Pearson.Correlation.Coefficient ~ Number.of.Training.Epochs, data = df)
+
+$Number.of.Training.Epochs
+          diff         lwr        upr     p adj
+5-2 0.08862835  0.05465291 0.12260378 0.0000000
+8-2 0.11963515  0.08565972 0.15361059 0.0000000
+8-5 0.03100680 -0.00296863 0.06498224 0.0818777
+
+
+
+$spearman
+$spearman$Stopwords
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Spearman.Correlation.Coefficient ~ Stopwords., data = df)
+
+$Stopwords.
+                  diff         lwr         upr    p adj
+True-False -0.06264081 -0.09025074 -0.03503087 1.08e-05
+
+
+$spearman$References
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Spearman.Correlation.Coefficient ~ References.Preserved., data = df)
+
+$References.Preserved.
+                   diff         lwr        upr     p adj
+True-False -0.004566863 -0.03288308 0.02374935 0.7513339
+
+
+$spearman$Algorithm
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Spearman.Correlation.Coefficient ~ Training.Algorithm, data = df)
+
+$Training.Algorithm
+                       diff       lwr       upr p adj
+Word2Vec-FastText 0.2295815 0.2131922 0.2459707     0
+
+
+$spearman$Dimensions
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Spearman.Correlation.Coefficient ~ Dimensions, data = df)
+
+$Dimensions
+              diff         lwr         upr     p adj
+32-256 -0.03595295 -0.06404098 -0.00786492 0.0122531
+
+
+$spearman$Window
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Spearman.Correlation.Coefficient ~ Window, data = df)
+
+$Window
+          diff         lwr        upr     p adj
+8-2 0.03372653 0.005610563 0.06184249 0.0188495
+
+
+$spearman$Threshold
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Spearman.Correlation.Coefficient ~ Minimum.Count.Threshold, data = df)
+
+$Minimum.Count.Threshold
+             diff         lwr       upr     p adj
+5-20 -0.008153862 -0.03646192 0.0201542 0.5714932
+
+
+$spearman$Epochs
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Spearman.Correlation.Coefficient ~ Number.of.Training.Epochs, data = df)
+
+$Number.of.Training.Epochs
+          diff         lwr        upr     p adj
+5-2 0.09453365  0.05614467 0.13292263 0.0000000
+8-2 0.12718746  0.08879848 0.16557643 0.0000000
+8-5 0.03265381 -0.00573517 0.07104278 0.1132389
+
+
+
+$analogy
+$analogy$Stopwords
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Overall.Analogy.Accuracy.... ~ Stopwords., data = df)
+
+$Stopwords.
+               diff       lwr     upr     p adj
+True-False 1.892953 -2.562035 6.34794 0.4039876
+
+
+$analogy$References
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Overall.Analogy.Accuracy.... ~ References.Preserved., data = df)
+
+$References.Preserved.
+                  diff       lwr      upr     p adj
+True-False -0.09742908 -4.556474 4.361616 0.9657552
+
+
+$analogy$Algorithm
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Overall.Analogy.Accuracy.... ~ Training.Algorithm, data = df)
+
+$Training.Algorithm
+                       diff       lwr       upr p adj
+Word2Vec-FastText -42.50018 -43.76643 -41.23392     0
+
+
+$analogy$Dimensions
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Overall.Analogy.Accuracy.... ~ Dimensions, data = df)
+
+$Dimensions
+            diff       lwr       upr    p adj
+32-256 -9.707369 -14.05818 -5.356563 1.49e-05
+
+
+$analogy$Window
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Overall.Analogy.Accuracy.... ~ Window, data = df)
+
+$Window
+          diff      lwr      upr     p adj
+8-2 -0.0606185 -4.51967 4.398433 0.9786895
+
+
+$analogy$Threshold
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Overall.Analogy.Accuracy.... ~ Minimum.Count.Threshold, data = df)
+
+$Minimum.Count.Threshold
+          diff       lwr      upr     p adj
+5-20 -2.323709 -6.776633 2.129215 0.3055237
+
+
+$analogy$Epochs
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = Overall.Analogy.Accuracy.... ~ Number.of.Training.Epochs, data = df)
+
+$Number.of.Training.Epochs
+        diff       lwr       upr     p adj
+5-2 4.264335 -2.244465 10.773136 0.2727118
+8-2 5.295792 -1.213009 11.804592 0.1359764
+8-5 1.031456 -5.477344  7.540256 0.9262478
+
+
+
+
+> sink()

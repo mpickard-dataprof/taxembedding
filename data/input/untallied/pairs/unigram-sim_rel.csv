@@ -1,0 +1,28 @@
+word1,word2,similarity,related,count1,count2,>50?
+asset,liability,0.00,8.67,7477,7888,1
+cash ,asset,6.00,8.67,4328,7477,1
+copyright,patent,6.00,9.33,190,301,1
+cost,expense,8.33,8.00,7325,3536,1
+credit,exclusion,2.33,2.00,11920,1796,1
+debt ,liability,7.67,9.33,6036,7888,1
+deduction,credit,7.67,8.33,13152,11920,1
+deduction,exemption,6.67,7.67,13152,2919,1
+depreciation,amortization,6.33,9.67,5708,1396,1
+distribution,dividend,8.00,9.67,12770,4477,1
+equity,capital,8.00,8.00,1605,9835,1
+exclusion,exemption,8.50,8.00,1796,2919,1
+gross,net,3.67,9.33,15966,12705,1
+income,credit,0.67,9.00,61683,11920,1
+income,gain,8.50,9.00,61683,17360,1
+liability,exemption,0.33,1.33,7888,2919,1
+money,currency,9.67,9.00,2267,2442,1
+necessary,expense,1.33,8.33,3295,3536,1
+necessary,ordinary,8.00,8.67,3295,3047,1
+rent,royalty,7.67,8.67,1163,522,1
+sale,exchange,6.00,9.00,12634,9169,1
+tangible,intangible,0.33,7.33,1170,1760,1
+hobby,profit,0.00,7.67,9,1977,0
+lavish,extravagant,9.33,8.67,18,18,0
+lavish,necessary,0.67,7.67,18,3295,0
+ordinary,extravagant,0.67,7.00,3047,18,0
+ordinary,lavish,0.67,8.00,3047,18,0

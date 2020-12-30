@@ -1,0 +1,53 @@
+---
+title: "Reference Counter Test"
+author: "AlexanderWold_Z1817662"
+date: "12/28/2020"
+output: pdf_document
+---
+```{r}
+library(stringr)
+library(magrittr)
+library(ngram)
+library(dplyr)
+```
+
+```{r}
+source("~/Projects/taxembed/1_creation/process_corpus_temp.R")
+RDA_PATH <- "~/Projects/taxembed/data/corpora/rda/irc26.rda"
+RDA_ECFR <- "~/Projects/taxembed/data/corpora/rda/ecfr26.rda"
+REP_PATH <- "~/Projects/taxembed/1_creation/replacements"
+OUT_PATH <- "~/Projects/taxembed/data/input/untallied/replacements/distinct_replacements_irc26_ecfr"
+```
+
+```{r}
+load(RDA_PATH)
+load(RDA_ECFR)
+```
+
+```{r}
+cor <- prepare_corpus(irc26, preserve_ngrams = FALSE)
+cor2 <- prepare_corpus(ecfr26, preserve_ngrams = FALSE)
+
+irc26 <- cor
+ecfr26 <- cor2
+save(irc26, file = "~/Projects/taxembed/data/corpora/rda_processed/p_irc26.rda")
+save(ecfr26, file = "~/Projects/taxembed/data/corpora/rda_processed/p_ecfr26.rda")
+```
+
+```{r}
+head(cor, 10)
+```
+
+```{r}
+# read in the reference replacements made in the irc corpus
+lines <- readLines(con = REP_PATH)
+
+lines_sep <- str_remove_all(lines, pattern = ",")
+lines_sep <- unlist(str_split(lines_sep, pattern = "\\s"))
+
+replace_frame <- data.frame(lines_sep, stringsAsFactors = FALSE) %>% distinct()
+replace_frame <- cbind(replace_frame, rep("income", nrow(replace_frame)), rep(0, nrow(replace_frame)))
+
+write.table(replace_frame, file = OUT_PATH, sep = "\t",
+            quote = FALSE, col.names = FALSE, row.names = FALSE)
+```

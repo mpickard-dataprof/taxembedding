@@ -1,0 +1,34 @@
+
+> lapply(hsd_list, get_broom)
+$pearson
+# A tibble: 5 x 6
+  term                  comparison estimate conf.low conf.high adj.p.value
+  <chr>                 <chr>         <dbl>    <dbl>     <dbl>       <dbl>
+1 Stopwords.            True-False  0.0147   0.00252  0.0268       0.0196 
+2 References.Preserved. True-False -0.0116  -0.0242   0.000996     0.0697 
+3 Ngrams.               True-False  0.00711 -0.00596  0.0202       0.275  
+4 Dimensions            512-128     0.00310 -0.0102   0.0164       0.638  
+5 Window                4-10       -0.0169  -0.0286  -0.00512      0.00640
+
+$spearman
+# A tibble: 5 x 6
+  term                  comparison estimate  conf.low conf.high adj.p.value
+  <chr>                 <chr>         <dbl>     <dbl>     <dbl>       <dbl>
+1 Stopwords.            True-False  0.00549 -0.0128     0.0238      0.545  
+2 References.Preserved. True-False -0.0153  -0.0329     0.00220     0.0842 
+3 Ngrams.               True-False  0.0176   0.000340   0.0348      0.0459 
+4 Dimensions            512-128     0.00969 -0.00839    0.0278      0.282  
+5 Window                4-10       -0.0266  -0.0422    -0.0111      0.00149
+
+$analogy
+# A tibble: 5 x 6
+  term                  comparison estimate conf.low conf.high adj.p.value
+  <chr>                 <chr>         <dbl>    <dbl>     <dbl>       <dbl>
+1 Stopwords.            True-False    6.29     5.24       7.33    3.73e-13
+2 References.Preserved. True-False   -0.172   -2.74       2.39    8.92e- 1
+3 Ngrams.               True-False   -1.32    -3.84       1.20    2.92e- 1
+4 Dimensions            512-128      -0.183   -2.75       2.38    8.85e- 1
+5 Window                4-10          1.60    -0.898      4.10    2.01e- 1
+
+
+> sink()

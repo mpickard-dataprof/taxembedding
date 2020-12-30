@@ -16,14 +16,25 @@
 
 ##############################################################################
 #          |                                                                 #
+# SECTION: | PACKAGES                                                        #
+#----------|-----------------------------------------------------------------#
+# USE:     | loads the required packages                                     #
+#          |                                                                 #
+##############################################################################
+library(broom)
+library(purrr)
+library(pkgcond)
+
+##############################################################################
+#          |                                                                 #
 # SECTION: | OVERHEAD CONSTANTS                                              #
 #----------|-----------------------------------------------------------------#
 # USE:     | Change the variables in the section to manipulate the behaviour #
 #          | of this script                                                  #
 #          |                                                                 #
 ##############################################################################
-CORRELATION_FILE_PATH = "/home/mpickard/Projects/ustax/data/output_data/correlations.csv"
-OUTPUT_FILE_PATH = "/home/mpickard/Projects/ustax/data/output_data/anova_tukey_variables.txt"
+CORRELATION_FILE_PATH = "~/Projects/taxembed/data/output/validations/test_ngram_var"
+OUTPUT_FILE_PATH = "~/Projects/taxembed/data/output/variables/test_ngrams"
 
 
 ##############################################################################
@@ -76,6 +87,14 @@ model_aov <- function(df, pearson = TRUE, spearman = TRUE, analogy = TRUE)
     anova_pearson[["Algorithm"]] <- aov(Pearson.Correlation.Coefficient ~ Training.Algorithm, data = df)
     anova_spearman[["Algorithm"]] <- aov(Spearman.Correlation.Coefficient ~ Training.Algorithm, data = df)
     anova_analogy[["Algorithm"]] <- aov(Overall.Analogy.Accuracy.... ~ Training.Algorithm, data = df)
+  }
+  
+  # anova table for the ngrams
+  if (nlevels(df$Ngrams.) >= 2)
+  {
+    anova_pearson[["Ngram"]] <- aov(Pearson.Correlation.Coefficient ~ Ngrams., data = df)
+    anova_spearman[["Ngram"]] <- aov(Spearman.Correlation.Coefficient ~ Ngrams., data = df)
+    anova_analogy[["Ngram"]] <- aov(Overall.Analogy.Accuracy.... ~ Ngrams., data = df)
   }
 
   # anova table for the number of dimensions
@@ -143,7 +162,8 @@ model_aov <- function(df, pearson = TRUE, spearman = TRUE, analogy = TRUE)
 ################################################################
 apply_tukey <- function(aov_list)
 {
-  lapply(aov_list, TukeyHSD)
+  tukey_list <- lapply(aov_list, TukeyHSD)
+  tukey_list
 }
 
 
@@ -159,6 +179,24 @@ get_tukey <- function(list_of_aov_lists)
 {
   tukey_list <- lapply(list_of_aov_lists, apply_tukey)
   tukey_list
+}
+
+
+################################################################
+#           |                                                  #
+# FUNCTION: | get_broom                                        #
+#-----------|--------------------------------------------------#
+# USE:      | given a list of tukey outputs, this function     #
+#           | uses the tidy function and the reduce function   #
+#           | to display the variable tests in an easy-to-read #
+#           | format                                           #
+#           |                                                  #
+################################################################
+get_broom <- function(list_of_tukey_tables)
+{
+  broom_out <- lapply(list_of_tukey_tables, tidy)
+  broom_out <- suppress_messages(reduce(broom_out, full_join))
+  broom_out
 }
 
 
@@ -178,8 +216,9 @@ cor_frame[ , col_factors] <- data.frame(apply(cor_frame[col_factors], 2, as.fact
 
 # get the tukeyHSD information
 variables_aov <- model_aov(cor_frame)
+hsd_list <- get_tukey(variables_aov)
 
 # print the tukeyHSD information
 sink(OUTPUT_FILE_PATH)
-get_tukey(variables_aov)
+lapply(hsd_list, get_broom)
 sink()
