@@ -1,5 +1,5 @@
-source("./data-raw/irc26.R")
-source("./data-raw/ecfr26.R")
+source("./data/corpora/irc26.R")
+source("./data/corpora/ecfr26.R")
 library(fs)
 
 load_corpus <- function() {
