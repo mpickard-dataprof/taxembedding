@@ -1,0 +1,94 @@
+word1,word2,similarity,related,count1,count2,>50?
+acquisition indebtedness,adjusted Gross Income,1.5,2,211,670,1
+adjusted gross income,net income,3.5,4,670,1906,1
+adjusted gross income,taxable income,2,8.5,670,6473,1
+earned income,social security,1,7,580,1228,1
+earned income,unearned income,1,5.333333333,580,97,1
+estimated tax,tax liability,7.333333333,8,548,2594,1
+gross income,gross profit,4,8,10095,213,1
+life insurance,ordinary income,1,1,2343,1301,1
+modified adjusted gross income,adjusted gross income,4.5,8.5,130,670,1
+modified adjusted gross income,Roth IRA,1,7,130,340,1
+net investment income,modified adjusted gross income,3.5,5,359,130,1
+realized gain,unrealized gain,1,8,92,51,1
+S Corporation,Pass-through entity,7.333333333,9,2805,155,1
+straight-line,declining balance,3.333333333,8.333333333,87,156,1
+tax liability,tax exemption,4,5,2594,147,1
+tax-exempt interest income,passive income,4.5,8,63,1228,1
+unearned income,social security,0.3333333333,0.6666666667,97,1228,1
+wage base,adjusted gross income,2.333333333,2,85,670,1
+wage base,adjusted gross income,0.5,1.5,85,670,1
+above the line,below the line,0.5,9.5,0,1,0
+adjusted gross income,above the line,0.5,6.5,670,0,0
+adoption credit,child credit,2,3.666666667,0,0,0
+alimony,child support,3.333333333,8.666666667,137,29,0
+appreciated investment,realized gain,3.5,6.5,0,92,0
+bargain sale to charity,below-market-rate loans,0,0,0,0,0
+bonus depreciation,bargain sale to charity,0.6666666667,0,148,0,0
+burden of proof,combat pay,0,0,101,0,0
+cancelled debt,income,4.666666667,7.666666667,0,61683,0
+capital gains tax,retirement plan,1,1.5,12,478,0
+charitable contribution,itemized deduction,4,8.333333333,402,13,0
+college expense deduction,health savings account,0.6666666667,0.3333333333,0,53,0
+college expense deduction,qualified retirement savings contributions,0.3333333333,0.3333333333,0,4,0
+consumer interest,personal interest,6.666666667,5.666666667,0,26,0
+corporate tax,personal tax,1.666666667,4.333333333,58,0,0
+cost basis,current market value,0.3333333333,7.666666667,133,11,0
+dependent,head of household,0.6666666667,8.666666667,1054,33,0
+dependent care assistance,noncash benefit,5,8,38,0,0
+earned income,payroll tax,1,7.666666667,580,9,0
+education expense,clothing expense,2.5,2.5,7,0,0
+estimated tax,quarterly payment,6.333333333,8,548,4,0
+estimated tax,tax penalty,1,5,548,1,0
+forgiven debt,canceled debt,10,7,0,0,0
+fringe benefit,dependent care assistance,5,8,195,38,0
+fringe benefit,noncash benefit,8,8,195,0,0
+imputed income,fringe benefit,1.5,4,20,195,0
+imputed income,net income,2,4.5,20,1906,0
+imputed income,ordinary income,7,9,20,1301,0
+incentive tax ???,deduction,0,0,4,13152,0
+income-producing activity,accelerated depreciation,0.5,0.5,5,42,0
+income-producing property,real estate,1.5,7.5,6,1678,0
+individual retirement account,jury duty pay,0.3333333333,0.3333333333,202,1,0
+kiddie tax,child credit,3.333333333,3,0,0,0
+life insurance,imputed income,2,8,2343,20,0
+lump-sum distribution,Form 4972,1,9.5,12,0,0
+lump-sum distribution,premature distribution,1.333333333,4.666666667,12,1,0
+marginal tax rate,roth 401(k),0.6666666667,1.333333333,25,0,0
+material participation,qualified nonprofit organization,0.3333333333,0,108,29,0
+mid-month convention,mid-quarter convention,3.666666667,8,23,31,0
+modified adjusted gross income,Roth 401(k),1,7,130,0,0
+modified adjusted gross income,tax-exempt interest income,4,8,130,9,0
+multiple-support agreement,nanny tax,1,1.333333333,1,0,0
+noncash benefit,receipt,0.5,0.5,0,1540,0
+ordinary and necessary,lavish or extravagant,0,9.5,160,18,0
+ordinary and necessary income-producing expense,ordinary and necessary trade or business expense,9.333333333,9.333333333,0,1,0
+ordinary and necessary income-producing expense,personal income,0.5,3.5,0,1,0
+ordinary and necessary trade or business expense,personal expense,1,6,1,4,0
+ordinary gain,ordinary income,8,9,18,1301,0
+original cost,salvage value,1,8,20,339,0
+passive activity,active activity,0.5,7.5,726,0,0
+passive gain,dividend,7,7,1,4477,0
+passive gain,stock,5,5,1,33541,0
+passive loss,dividend,1,3.5,24,4477,0
+personal income,adjusted gross income,6.5,6.5,1,670,0
+personal income,ordinary income,7.5,7.5,1,1301,0
+premature distribution,early withdrawal,8,8,1,8,0
+pretax income,earnings before tax,10,7.333333333,0,0,0
+qualified corporation,qualified nonprofit organization,0.3333333333,0.3333333333,7,29,0
+qualified long-term care insurance contract,health insurance premium,1.5,7,47,3,0
+Roth 401(k),Roth IRA,5,9,0,340,0
+Roth IRA,401(k),7.333333333,8.333333333,340,0,0
+specified passive activity loss,publicly traded partnership,0,2.5,8,140,0
+standard deduction,itemized deduction,3.666666667,8.666666667,145,13,0
+straight-line depreciation,accelerated depreciation,2,9.5,10,42,0
+tax base,tax revenue,3,8.5,53,0,0
+tax break,tax credit,8.333333333,7.333333333,0,1006,0
+tax-exempt interest income,active income,1,1.5,6473,3,0
+taxable income,tax-free income,0.3333333333,7.666666667,9,34,0
+taxable wage base,social security,1.5,5,9,340,0
+underpayment penalty,tax return,0,2.333333333,3,4653,0
+unearned income,payroll tax,0.3333333333,0.6666666667,97,9,0
+voluntary witholding,estimated taxes,5.333333333,7.666666667,0,12,0
+wash sale,securities,1,9.5,27,4871,0
+witholding,estimated tax,5,8,3,548,0
