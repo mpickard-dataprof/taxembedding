@@ -17,7 +17,8 @@ generateEmbeddings <- function() {
   plan(multiprocess)
 
 
-  num_cores <- availableCores() / 2
+  # num_cores <- availableCores() / 2
+  num_cores <- 12
   plan(multiprocess, workers = num_cores)
 
   ## check if 'corpi' and 'embeddings' directories exists
@@ -39,16 +40,16 @@ generateEmbeddings <- function() {
 
   ## embedding hyperparameters here
   type <- c("word2vec", "fasttext")
-  dimensions <- c(32L, 256L)
+  dimensions <- c(64L, 128L, 256L)
   # dimensions <- c(32L, 128L, 256L, 512L)
   # dimensions <- c(32L, 64L, 96L, 128L, 192L, 256L, 512L)
-  window <- c(2L, 8L)
+  window <- c(8L, 20L)
   # window <- c(2L, 4L, 8L)
   # window <- c(2L, 4L, 5L, 8L, 10L)
-  min_word_occur <- c(5L, 20L)
+  min_word_occur <- c(5L, 10L, 20L, 50L)
   # min_word_occur <- c(5L, 20L, 50L)
   # min_word_occur <- c(3L, 5L, 10L, 20L, 50L)
-  epochs = c(2L, 5L, 8L)
+  epochs = c(5L, 20L)
 
   corpus_param_df <- expand_grid(remove_stopwords, preserve_code_references, preserve_ngrams)
 
@@ -178,8 +179,8 @@ train_gensim_wv <- function(corpuspath,
     return(embed_info)
   }
 
-  # numCores <- 8L
-  numCores <- as.integer(parallel::detectCores() / 2)
+  numCores <- 12L
+  # numCores <- as.integer(parallel::detectCores() / 2)
 
   if (!file_exists(corpuspath)) {
     cat("Corpus (", corpuspath, ") not found.\n")
