@@ -6,7 +6,7 @@ library(fs)
 download_ecfr26 <- function() {
 
   ecfr26_url <- "https://www.govinfo.gov/bulkdata/ECFR/title-26/ECFR-title26.xml"
-  file_path <- path("~/Projects/taxembed/data/corpora", "ecfr26.xml")
+  file_path <- path("data/corpora", "ecfr26.xml")
   download.file(ecfr26_url, file_path)
 
 }
@@ -24,7 +24,7 @@ extract_ecfr26 <- function(removeNotes = TRUE, removeTOC = TRUE) {
   #   invisible(ecfr26)
   # }
 
-  raw_file_path <- file.path("~/Projects/taxembed/data/corpora", "ecfr26.xml")
+  raw_file_path <- file.path("data/corpora", "ecfr26.xml")
 
   if (!file_exists(raw_file_path)) {
     message("downloading ecfr26.xml...")
@@ -69,4 +69,9 @@ extract_ecfr26 <- function(removeNotes = TRUE, removeTOC = TRUE) {
 }
 
 
-extract_ecfr26()
+out_file_path <- file.path("data", "ecfr26.rda")
+if (!file_exists(out_file_path)) {
+  extract_ecfr26()
+} else {
+  message(paste(out_file_path, "already exists. Skipping."))
+}

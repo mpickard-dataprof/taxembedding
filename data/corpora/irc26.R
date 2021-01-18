@@ -11,7 +11,7 @@ download_irc26 <- function() {
   irc26_url <- "https://uscode.house.gov/download/releasepoints/us/pl/116/138not113/xml_usc26@116-138not113.zip"
   file_path <- path(tempdir(), "usc26xml.zip")
   download.file(irc26_url, file_path)
-  unzip(file_path, exdir = "~/Projects/taxembed/data/corpora")
+  unzip(file_path, exdir = "data/corpora")
 
 }
 
@@ -29,7 +29,7 @@ extract_irc26 <- function(removeNotes = TRUE, removeTOC = TRUE) {
   #   invisible(irc26)
   # }
 
-  raw_file_path <- file.path("~/Projects/taxembed/data/corpora", "usc26.xml")
+  raw_file_path <- file.path("data/corpora", "usc26.xml")
 
   if (!file_exists(raw_file_path)) {
     message("downloading usc26xml.zip...")
@@ -117,4 +117,9 @@ extract_irc26 <- function(removeNotes = TRUE, removeTOC = TRUE) {
 }
 
 
-extract_irc26()
+out_file_path <- file.path("data", "irc26.rda")
+if (!file_exists(out_file_path)) {
+  extract_irc26()
+} else {
+  message(paste(out_file_path, "already exists. Skipping."))
+}
