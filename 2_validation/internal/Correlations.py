@@ -19,10 +19,11 @@
 #          | behaviour of the script                                         #
 #          |                                                                 #
 ##############################################################################
-MODEL_PATH = "/home/alex/Projects/taxembed/data/embeddings"
-OUT_TABLE_PATH = "/home/alex/Projects/taxembed/data/output/validations/test_ngram_var"
-SIM_REL_PAIRS_PATH = "/home/alex/Projects/taxembed/data/output/tallied/pairs/wordsim_similarity_goldstandard_filtered"
-ANALOGIES_PATH = "/home/alex/Projects/taxembed/data/output/tallied/analogies/test_analogy_filtered"
+MODEL_PATH = "/data/rstudio/embeddings"
+OUT_TABLE_PATH = "/home/alex/Projects/taxembed/data/output/validations/custom_ngram_similarity_custom_ngram_analogies_1_6_2021.csv"
+SIM_REL_PAIRS_PATH = "/home/alex/Projects/taxembed/data/output/tallied/pairs/ngram_sim"
+ANALOGIES_PATH = "/home/alex/Projects/taxembed/data/output/tallied/analogies/analogies-ngrams"
+NGRAMS = True
 
 
 ##############################################################################
@@ -179,6 +180,9 @@ def name_scrape(file_name):
 # use list comprehension tp get a list of models within the 'models' folder
 # do not list the peripheral .npy files
 model_list = [file for file in os.listdir(MODEL_PATH) if re.match("^(?:(?!\.).)*$", file)]
+
+if NGRAMS == True:
+    model_list = [modelname for modelname in model_list if re.search("(?<!no_)ngrams", modelname)]
 
 # create an empty list to hold the path names for each model
 model_paths = []

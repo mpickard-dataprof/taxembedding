@@ -1,0 +1,81 @@
+---
+title: "Tensor Flow Projector"
+author: "AlexanderWold_Z1817662"
+date: "1/5/2021"
+output: pdf_document
+---
+```{r}
+library(reticulate)
+```
+
+
+```{python}
+# import modules
+import keras
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+from tensorboard.plugins import projector
+import revised_word2vec2tensor
+
+# for word2vec conversion to tensor
+import gensim
+from gensim import utils
+import sys
+import logging
+import argparse
+import os
+```
+
+
+```{python}
+MODEL_PATH = "/home/alex/Projects/taxembed/data/embeddings/sw_refs_w2v_no_ngrams_d_512_w_10_mwo_5_e_5"
+OUT_PATH = "/home/alex/Projects/taxembed/2_validation/tools/wv_embed/sw_refs_w2v_no_ngrams_d_512_w_10_mwo_5_e_5"
+
+loaded_model = gensim.models.Word2Vec.load(MODEL_PATH)
+loaded_model.wv.save_word2vec_format(fname = OUT_PATH)
+```
+
+
+```{python}
+revised_word2vec2tensor.word2vec2tensor(OUT_PATH, "test1")
+```
+
+```{python}
+```
+
+
+
+```{python}
+```
+
+```{python}
+```
+
+```{python}
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{python}
+
+```
+
+```{r}
+
+```
+

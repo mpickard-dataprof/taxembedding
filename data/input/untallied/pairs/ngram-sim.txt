@@ -1,93 +1,93 @@
-acquisition indebtedness	adjusted Gross Income	1.50
-adjusted gross income	net income	3.50
-adjusted gross income	taxable income	2.00
-earned income	social security	1.00
-earned income	unearned income	1.00
-estimated tax	tax liability	7.33
-gross income	gross profit	4.00
-life insurance	ordinary income	1.00
-modified adjusted gross income	adjusted gross income	4.50
-modified adjusted gross income	Roth IRA	1.00
-net investment income	modified adjusted gross income	3.50
-realized gain	unrealized gain	1.00
-S Corporation	Pass-through entity	7.33
-straight-line	declining balance	3.33
-tax liability	tax exemption	4.00
-tax-exempt interest income	passive income	4.50
-unearned income	social security	0.33
-wage base	adjusted gross income	2.33
-wage base	adjusted gross income	0.50
-above the line	below the line	0.50
-adjusted gross income	above the line	0.50
-adoption credit	child credit	2.00
-alimony	child support	3.33
-appreciated investment	realized gain	3.50
-bargain sale to charity	below-market-rate loans	0.00
-bonus depreciation	bargain sale to charity	0.67
-burden of proof	combat pay	0.00
-cancelled debt	income	4.67
-capital gains tax	retirement plan	1.00
-charitable contribution	itemized deduction	4.00
-college expense deduction	health savings account	0.67
-college expense deduction	qualified retirement savings contributions	0.33
-consumer interest	personal interest	6.67
-corporate tax	personal tax	1.67
-cost basis	current market value	0.33
-dependent	head of household	0.67
-dependent care assistance	noncash benefit	5.00
-earned income	payroll tax	1.00
-education expense	clothing expense	2.50
-estimated tax	quarterly payment	6.33
-estimated tax	tax penalty	1.00
-forgiven debt	canceled debt	10.00
-fringe benefit	dependent care assistance	5.00
-fringe benefit	noncash benefit	8.00
-imputed income	fringe benefit	1.50
-imputed income	net income	2.00
-imputed income	ordinary income	7.00
-incentive tax ???	deduction	0.00
-income-producing activity	accelerated depreciation	0.50
-income-producing property	real estate	1.50
-individual retirement account	jury duty pay	0.33
-kiddie tax	child credit	3.33
-life insurance	imputed income	2.00
-lump-sum distribution	Form 4972	1.00
-lump-sum distribution	premature distribution	1.33
-marginal tax rate	roth 401(k)	0.67
-material participation	qualified nonprofit organization	0.33
-mid-month convention	mid-quarter convention	3.67
-modified adjusted gross income	Roth 401(k)	1.00
-modified adjusted gross income	tax-exempt interest income	4.00
-multiple-support agreement	nanny tax	1.00
-noncash benefit	receipt	0.50
-ordinary and necessary	lavish or extravagant	0.00
-ordinary and necessary income-producing expense	ordinary and necessary trade or business expense	9.33
-ordinary and necessary income-producing expense	personal income	0.50
-ordinary and necessary trade or business expense	personal expense	1.00
-ordinary gain	ordinary income	8.00
-original cost	salvage value	1.00
-passive activity	active activity	0.50
-passive gain	dividend	7.00
-passive gain	stock	5.00
-passive loss	dividend	1.00
-personal income	adjusted gross income	6.50
-personal income	ordinary income	7.50
-premature distribution	early withdrawal	8.00
-pretax income	earnings before tax	10.00
-qualified corporation	qualified nonprofit organization	0.33
-qualified long-term care insurance contract	health insurance premium	1.50
-Roth 401(k)	Roth IRA	5.00
-Roth IRA	401(k)	7.33
-specified passive activity loss	publicly traded partnership	0.00
-standard deduction	itemized deduction	3.67
-straight-line depreciation	accelerated depreciation	2.00
-tax base	tax revenue	3.00
-tax break	tax credit	8.33
-tax-exempt interest income	active income	1.00
-taxable income	tax-free income	0.33
-taxable wage base	social security	1.50
-underpayment penalty	tax return	0.00
-unearned income	payroll tax	0.33
-voluntary witholding	estimated taxes	5.33
-wash sale	securities	1.00
-witholding	estimated tax	5.00
+acquisition_indebtedness	adjusted_Gross_Income	1.50
+adjusted_gross_income	net_income	3.50
+adjusted_gross_income	taxable_income	2.00
+earned_income	social_security	1.00
+earned_income	unearned_income	1.00
+estimated_tax	tax_liability	7.33
+gross_income	gross_profit	4.00
+life_insurance	ordinary_income	1.00
+modified_adjusted_gross_income	adjusted_gross_income	4.50
+modified_adjusted_gross_income	Roth_IRA	1.00
+net_investment_income	modified_adjusted_gross_income	3.50
+realized_gain	unrealized_gain	1.00
+S_Corporation	Pass-through_entity	7.33
+straight-line	declining_balance	3.33
+tax_liability	tax_exemption	4.00
+tax-exempt_interest_income	passive_income	4.50
+unearned_income	social_security	0.33
+wage_base	adjusted_gross_income	2.33
+wage_base	adjusted_gross_income	0.50
+above_the_line	below_the_line	0.50
+adjusted_gross_income	above_the_line	0.50
+adoption_credit	child_credit	2.00
+alimony	child_support	3.33
+appreciated_investment	realized_gain	3.50
+bargain_sale_to_charity	below-market-rate_loans	0.00
+bonus_depreciation	bargain_sale_to_charity	0.67
+burden_of_proof	combat_pay	0.00
+cancelled_debt	income	4.67
+capital_gains_tax	retirement_plan	1.00
+charitable_contribution	itemized_deduction	4.00
+college_expense_deduction	health_savings_account	0.67
+college_expense_deduction	qualified_retirement_savings_contributions	0.33
+consumer_interest	personal_interest	6.67
+corporate_tax	personal_tax	1.67
+cost_basis	current_market_value	0.33
+dependent	head_of_household	0.67
+dependent_care_assistance	noncash_benefit	5.00
+earned_income	payroll_tax	1.00
+education_expense	clothing_expense	2.50
+estimated_tax	quarterly_payment	6.33
+estimated_tax	tax_penalty	1.00
+forgiven_debt	canceled_debt	10.00
+fringe_benefit	dependent_care_assistance	5.00
+fringe_benefit	noncash_benefit	8.00
+imputed_income	fringe_benefit	1.50
+imputed_income	net_income	2.00
+imputed_income	ordinary_income	7.00
+incentive_tax_???	deduction	0.00
+income-producing_activity	accelerated_depreciation	0.50
+income-producing_property	real_estate	1.50
+individual_retirement_account	jury_duty_pay	0.33
+kiddie_tax	child_credit	3.33
+life_insurance	imputed_income	2.00
+lump-sum_distribution	Form_4972	1.00
+lump-sum_distribution	premature_distribution	1.33
+marginal_tax_rate	roth_401(k)	0.67
+material_participation	qualified_nonprofit_organization	0.33
+mid-month_convention	mid-quarter_convention	3.67
+modified_adjusted_gross_income	Roth_401(k)	1.00
+modified_adjusted_gross_income	tax-exempt_interest_income	4.00
+multiple-support_agreement	nanny_tax	1.00
+noncash_benefit	receipt	0.50
+ordinary_and_necessary	lavish_or_extravagant	0.00
+ordinary_and_necessary_income-producing_expense	ordinary_and_necessary_trade_or_business_expense	9.33
+ordinary_and_necessary_income-producing_expense	personal_income	0.50
+ordinary_and_necessary_trade_or_business_expense	personal_expense	1.00
+ordinary_gain	ordinary_income	8.00
+original_cost	salvage_value	1.00
+passive_activity	active_activity	0.50
+passive_gain	dividend	7.00
+passive_gain	stock	5.00
+passive_loss	dividend	1.00
+personal_income	adjusted_gross_income	6.50
+personal_income	ordinary_income	7.50
+premature_distribution	early_withdrawal	8.00
+pretax_income	earnings_before_tax	10.00
+qualified_corporation	qualified_nonprofit_organization	0.33
+qualified_long-term_care_insurance_contract	health_insurance_premium	1.50
+Roth_401(k)	Roth_IRA	5.00
+Roth_IRA	401(k)	7.33
+specified_passive_activity_loss	publicly_traded_partnership	0.00
+standard_deduction	itemized_deduction	3.67
+straight-line_depreciation	accelerated_depreciation	2.00
+tax_base	tax_revenue	3.00
+tax_break	tax_credit	8.33
+tax-exempt_interest_income	active_income	1.00
+taxable_income	tax-free_income	0.33
+taxable_wage_base	social_security	1.50
+underpayment_penalty	tax_return	0.00
+unearned_income	payroll_tax	0.33
+voluntary_witholding	estimated_taxes	5.33
+wash_sale	securities	1.00
+witholding	estimated_tax	5.00

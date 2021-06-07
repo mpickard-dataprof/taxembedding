@@ -1,0 +1,4 @@
+,Model Name,Stopwords?,References Preserved?,Training Algorithm,Ngrams?,Dimensions,Window,Minimum Count Threshold,Number of Training Epochs,Pearson Correlation Coefficient,Pearson Correlation Coefficient P-Value,Spearman Correlation Coefficient,Spearman Correlation Coefficient P-Value,Unknown Word Pairs %
+0,nosw_norefs_w2v_no_ngrams_d_64_w_20_mwo_50_e_20,False,False,Word2Vec,False,64,20,50,20,0.6563,0.0,0.6723,0.0,71.43
+1,sw_norefs_w2v_no_ngrams_d_64_w_8_mwo_20_e_20,True,False,Word2Vec,False,64,8,20,20,0.6278,0.0,0.5855,0.0,60.1
+2,nosw_norefs_w2v_no_ngrams_d_0_w_0_mwo_0_e_0,False,False,Word2Vec,False,0,0,0,0,0.7274,0.0,0.7408,0.0,0.0

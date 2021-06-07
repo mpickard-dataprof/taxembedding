@@ -1,0 +1,17 @@
+wage_base	adjusted_gross_income	2.33
+wage_base	adjusted_gross_income	0.5
+taxable_wage_base	social_security	1.5
+unearned_income	social_security	0.33
+realized_gain	unrealized_gain	1
+modified_adjusted_gross_income	adjusted_gross_income	4.5
+acquisition_indebtedness	adjusted_Gross_Income	1.5
+fringe_benefit	dependent_care_assistance	5
+net_investment_income	modified_adjusted_gross_income	3.5
+earned_income	social_security	1
+earned_income	unearned_income	1
+life_insurance	ordinary_income	1
+adjusted_gross_income	net_income	3.5
+adjusted_gross_income	taxable_income	2
+estimated_tax	tax_liability	7.33
+tax_liability	tax_exemption	4
+gross_income	gross_profit	4
