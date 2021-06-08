@@ -23,6 +23,7 @@
 ##############################################################################
 library(broom)
 library(purrr)
+library(dplyr)
 library(pkgcond)
 
 ##############################################################################
@@ -33,8 +34,8 @@ library(pkgcond)
 #          | of this script                                                  #
 #          |                                                                 #
 ##############################################################################
-CORRELATION_FILE_PATH = "~/Projects/taxembed/data/output/validations/test_ngram_var"
-OUTPUT_FILE_PATH = "~/Projects/taxembed/data/output/variables/test_ngrams"
+CORRELATION_FILE_PATH = "/home/alex/Projects/taxembed/data/output/validations/custom_ngram_similarity_custom_ngram_analogies_1_6_2021.csv"
+OUTPUT_FILE_PATH = "~/Projects/taxembed/data/output/variables/custom_ngram_similarity_custom_ngram_analogies_1_6_2021.csv_variabletests.txt"
 
 
 ##############################################################################
@@ -199,6 +200,19 @@ get_broom <- function(list_of_tukey_tables)
   broom_out
 }
 
+print_tibble <- function(list_of_tibbles)
+{
+  # loop through the provided list and print the tibble information
+  for(i in seq(1, length(list_of_tibbles)))
+  {
+    print(names(list_of_tibbles)[i])
+    print_frame <- as.data.frame(list_of_tibbles[i]) %>% mutate_if(is.numeric, round, digits = 4)
+    
+    print(print_frame)
+    cat("\n\n\n")
+  }
+}
+
 
 ##############################################################################
 #          |                                                                 #
@@ -211,14 +225,17 @@ get_broom <- function(list_of_tukey_tables)
 # Read in the data
 # read in the csv file for correlation information
 cor_frame <- read.csv(CORRELATION_FILE_PATH, header = TRUE)
-col_factors <- c("Dimensions", "Window", "Minimum.Count.Threshold", "Number.of.Training.Epochs")
+possible_factors <- c("Dimensions", "Window", "Minimum.Count.Threshold", "Number.of.Training.Epochs")
+col_factors <- possible_factors[possible_factors %in% names(cor_frame)]
 cor_frame[ , col_factors] <- data.frame(apply(cor_frame[col_factors], 2, as.factor))
 
 # get the tukeyHSD information
 variables_aov <- model_aov(cor_frame)
 hsd_list <- get_tukey(variables_aov)
+out_list <- lapply(hsd_list, get_broom)
 
 # print the tukeyHSD information
+options(width = 1000)
 sink(OUTPUT_FILE_PATH)
-lapply(hsd_list, get_broom)
+print_tibble(out_list)
 sink()

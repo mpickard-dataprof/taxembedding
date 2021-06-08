@@ -20,11 +20,11 @@
 #          | behavior of the script                                          #
 #          |                                                                 #
 ##############################################################################
-RDA_FILE_LOCATION <- "~/Projects/taxembed/data/corpora/rda_processed"
-INPUT_FILE_PATH <- "~/Projects/taxembed/data/input/untallied/replacements/distinct_replacements_irc26_ecfr"
-OUTPUT_FILE_PATH <- "~/Projects/taxembed/data/output/tallied/replacements/irc26_ecfr_distinct_reference_counts"
-ANALOGY_SWITCH <- FALSE
-INCLUDE_COUNTS <- TRUE
+RDS_FILE_LOCATION <- "~/Projects/taxembed/data/corpora/rda_processed/matt_processed/sw-t_refs-t_ngrams-t"
+INPUT_FILE_PATH <- "/home/alex/Projects/taxembed/data/input/untallied/analogies/analogies-ngrams"
+OUTPUT_FILE_PATH <- "~/Projects/taxembed/data/output/tallied/analogies/analogies-ngrams"
+ANALOGY_SWITCH <- TRUE
+INCLUDE_COUNTS <- FALSE
 CSV_SWITCH <- FALSE
 CUTOFF <- 10
 
@@ -125,6 +125,10 @@ grab_scores <- function(file_path = NULL, is_analogy = FALSE)
 ################################################################
 word_totals <- function(phrase)
 {
+  phrase <- str_replace_all(string = phrase, pattern = "\\(", replacement = "\\\\(")
+  phrase <- str_replace_all(string = phrase, pattern = "\\)", replacement = "\\\\)")
+  phrase <- str_replace_all(string = phrase, pattern = "\\?", replacement = "\\\\?")
+  
   search_pattern <- paste0("(?i)", "\\b", phrase, "\\b")
   sum(str_count(string = searchable_text, pattern = search_pattern))
 }
@@ -426,10 +430,7 @@ sort_analogies <- function(df, cutoff = 300, allMustQualify = TRUE, sortcol = "p
 #          | certain phrases within a provided, processed text corpus        #
 #          |                                                                 #
 ##############################################################################
-# retrieve the names of all rda files from the data directory and load them in one by one
-rda_files <- list.files(path = RDA_FILE_LOCATION, pattern = "[:print:]*\\.rda", full.names = TRUE)
-rda_names <- unlist(lapply(X = rda_files, FUN = load, envir = .GlobalEnv))
-searchable_text <- unlist(lapply(X = rda_names, FUN = get))
+searchable_text <- readRDS(file = RDS_FILE_LOCATION)
 
 # get the initial data frame of phrases to count
 if (ANALOGY_SWITCH == FALSE) {
@@ -481,10 +482,10 @@ if (ANALOGY_SWITCH == FALSE)
                                "particular2_phrase1", "particular2_phrase2")]
   }
   
-  section_title <- paste0(": <", toString(CUTOFF))
+  section_title <- paste0(": >", toString(CUTOFF))
   writeLines(text = section_title, con = OUTPUT_FILE_PATH)
   write.table(sorted_df, OUTPUT_FILE_PATH, row.names = FALSE, col.names = FALSE,
-              append = TRUE, quote = FALSE)
+              append = TRUE, quote = FALSE, sep = " ")
 }
 
 

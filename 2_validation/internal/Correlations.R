@@ -21,7 +21,7 @@
 #          |                                                                 #
 ##############################################################################
 PYTHON_CORRELATION_SCRIPT <- "~/Projects/taxembed/2_validation/internal/Correlations.py"
-PYTHON_CSV_LOCATION <- "~/Projects/taxembed/data/output/validations/test_ngram_var"
+PYTHON_CSV_LOCATION <- "/home/alex/Projects/taxembed/data/output/validations/custom_ngram_similarity_custom_ngram_analogies_1_6_2021.csv"
 
 
 ##############################################################################

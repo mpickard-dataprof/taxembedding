@@ -1,0 +1,83 @@
+---
+title: "Expand Corpus"
+author: "AlexanderWold_Z1817662"
+date: "5/24/2021"
+output: pdf_document
+---
+```{r}
+library(pdftools)
+library(stringr)
+library(rvest)
+library(xml2)
+```
+
+```{r}
+# define the path variables
+publications_path <- "/home/alex/Projects/taxembed/data/corpora/irs_corpi/htmlurls/publications.csv"
+instructions_path <- "/home/alex/Projects/taxembed/data/corpora/irs_corpi/htmlurls/instructions.csv"
+bulletins_path <- "/home/alex/Projects/taxembed/data/corpora/irs_corpi/htmlurls/bulletins.csv"
+filedest <- "/home/alex/Projects/taxembed/data/corpora/irs_corpi/corpi_files"
+
+# load in the data
+publist <- read.csv(publications_path)$publications
+inslist <- read.csv(instructions_path)$instructions
+bullist <- read.csv(bulletins_path)$bulletins
+```
+
+```{r}
+################# PUBLICATIONS
+# create storage for the publication data
+pubtext <- c()
+
+# loop through each of the html links
+for (url in publist) {
+  # rip the text from the url
+  pagetext <- read_html(url) %>% html_nodes("div.book") %>% html_text() %>% toString()
+  
+  pubtext <- c(pubtext, pagetext)
+}
+
+################# INSTRUCTIONS
+# create storage for the instruction data
+instext <- c()
+
+# loop through each of the html links
+for (url in inslist) {
+  # rip the text from the url
+  pagetext <- read_html(url) %>% html_nodes("div.book") %>% html_text() %>% toString()
+  
+  instext <- c(instext, pagetext)
+}
+
+################# BULLETINS
+# create storage for the bulletin data
+bultext <- c()
+
+# loop through each of the html links
+for (url in bullist) {
+  # rip the text from the url
+  pagetext <- read_html(url) %>% html_nodes("div.book") %>% html_text() %>% toString()
+  
+  bultext <- c(bultext, pagetext)
+}
+```
+
+
+```{r}
+save(pubtext, file = "/home/alex/Projects/taxembed/data/corpora/irs_corpi/publications.rda")
+save(instext, file = "/home/alex/Projects/taxembed/data/corpora/irs_corpi/instructions.rda")
+save(bultext, file = "/home/alex/Projects/taxembed/data/corpora/irs_corpi/bulletins.rda")
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+

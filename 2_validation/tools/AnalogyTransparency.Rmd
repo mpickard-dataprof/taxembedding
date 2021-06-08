@@ -1,0 +1,170 @@
+---
+title: "Analogy Transparency"
+author: "AlexanderWold_Z1817662"
+date: "4/7/2021"
+output: pdf_document
+---
+```{r}
+library(reticulate)
+```
+
+```{python, message = FALSE}
+import os
+import re
+import pandas as pd
+import numpy as np
+import gensim
+import multiprocessing as mp
+import time
+import timeit
+import functools
+
+# global options
+pd.set_option("display.max_columns", None)
+```
+
+```{python, message = FALSE}
+# define the model path
+model_path = "/data/rstudio/embeddings"
+
+# get the list of models from the user specified path
+# use list comprehension tp get a list of models within the 'models' folder
+# do not list the peripheral .npy files
+model_list = [file for file in os.listdir(model_path) if re.match("^(?:(?!\.).)*$", file) \
+              and os.path.isfile(os.path.join(model_path, file))]
+
+# create an empty list to hold the path names for each model
+model_paths = []
+
+# append the current working directory to each model name
+for model_name in model_list:
+    model_paths.append(os.path.join(model_path, model_name))
+
+# get the important analogy files
+analogy_path = "/home/alex/Projects/taxembed/2_validation/SkeletonKey/input/analogies"
+files = []
+
+for file in os.listdir(analogy_path):
+  files.append(os.path.join(analogy_path, file))
+
+files = [files[25]]
+```
+
+```{python}
+# define a function to get the name of a file from it's path
+def getmodelname(modelpath):
+  name = (modelpath.split("/"))[-1]
+  return name
+  
+# open the files and separate the 4 tuples into a, b, c, and d
+a, b, c, d = [], [], [], []
+for i in range(len(files)):
+  f = open(files[i], "r")
+  
+  for line in (f.readlines())[1:]:
+    line_frag = line.split(" ")
+    a.append(line_frag[0])
+    b.append(line_frag[1])
+    c.append(line_frag[2])
+    d.append(line_frag[3].replace('\n', ""))
+  
+  f.close()
+
+# create a pandas data frame with this information
+ABCD = pd.DataFrame({"A": a, "B": b, "C": c, "D": d})
+```
+
+
+```{python}
+newpaths = ["sw_refs_ft_no_ngrams_d_128_w_8_mwo_50_e_20",
+            "sw_norefs_ft_no_ngrams_d_128_w_8_mwo_20_e_5",
+            "sw_refs_ft_no_ngrams_d_128_w_20_mwo_50_e_5",
+            "nosw_norefs_ft_no_ngrams_d_64_w_8_mwo_50_e_5",
+            "sw_norefs_ft_no_ngrams_d_256_w_20_mwo_50_e_5",
+            "sw_norefs_ft_no_ngrams_d_128_w_20_mwo_50_e_5",
+            "sw_refs_ft_no_ngrams_d_64_w_20_mwo_50_e_20",
+            "sw_norefs_ft_no_ngrams_d_256_w_20_mwo_50_e_20",
+            "sw_refs_ft_no_ngrams_d_256_w_8_mwo_50_e_5",
+            "sw_norefs_ft_no_ngrams_d_64_w_20_mwo_50_e_5",
+            "sw_norefs_ft_no_ngrams_d_128_w_8_mwo_50_e_20",
+            "sw_refs_ft_no_ngrams_d_256_w_20_mwo_50_e_5",
+            "sw_norefs_ft_no_ngrams_d_64_w_8_mwo_50_e_5",
+            "nosw_refs_ft_no_ngrams_d_256_w_2_mwo_20_e_2",
+            "sw_refs_ft_no_ngrams_d_256_w_8_mwo_20_e_2",
+            "sw_refs_ft_no_ngrams_d_128_w_8_mwo_50_e_5",
+            "sw_norefs_ft_no_ngrams_d_256_w_8_mwo_20_e_2",
+            "sw_norefs_w2v_no_ngrams_d_64_w_8_mwo_50_e_5",
+            "sw_refs_w2v_no_ngrams_d_64_w_20_mwo_50_e_5",
+            "nosw_refs_w2v_no_ngrams_d_32_w_8_mwo_20_e_5",
+            "sw_refs_w2v_no_ngrams_d_128_w_20_mwo_50_e_5"]
+            
+for i in range(len(newpaths)):
+  newpaths[i] = os.path.join(model_path, newpaths[i])
+
+```
+
+
+```{python, message = FALSE}
+# define a function to return the top five guessed analogy d answers
+def guess(embedpath, tuple4):
+  # load the model
+  try:
+    loaded_model = gensim.models.Word2Vec.load(embedpath)
+  except:
+    loaded_model = loaded_model = gensim.models.KeyedVectors.load(embedpath)
+  
+  # define an empty container for the results
+  guesses = []
+  results = pd.DataFrame()
+  
+  # loop through the analogy 4-tuples
+  for row in tuple4.itertuples(index = False, name = None):
+    # grab the top five guesses
+    try:
+      guesses = loaded_model.wv.most_similar(positive = [row[1], row[2]], negative = [row[0]], topn = 5)
+    except KeyError:
+      guesses = [("OOV", 0), ("OOV", 0), ("OOV", 0), ("OOV", 0), ("OOV", 0)]
+    
+    finally:
+      # collect the results
+      resdict = {"Embed_Name": getmodelname(embedpath),
+                 "A": row[0], "B": row[1], "C": row[2], "D": row[3],
+                 "guess1": guesses[0][0], "guess2": guesses[1][0], "guess3": guesses[2][0], "guess4": guesses[3][0], "guess5": guesses[4][0],
+                 "cosim1": guesses[0][1], "cosim2": guesses[1][1], "cosim3": guesses[2][1], "cosim4": guesses[3][1], "cosim5": guesses[4][1]}
+      results = results.append(resdict, ignore_index = True)
+      
+  # delete the model from memory
+  del loaded_model
+  
+  # return the model guesses
+  return results
+
+# define a function to perform parallel processing
+def parallelprocess(paths, tuple4):
+  # count available cores
+  pool = mp.Pool(mp.cpu_count())
+  
+  # get analogy guesses
+  res = pool.starmap(guess, [(path, tuple4) for path in paths])
+  
+  # close the pool
+  pool.close()
+  pool.join()
+  
+  return res
+
+
+# get the analogy transparency results
+transdfs = parallelprocess(newpaths, ABCD)
+maindf = pd.concat(transdfs)
+maindf.head(5)
+```
+
+```{python, message = FALSE}
+maindf.to_csv("/home/alex/Projects/taxembed/2_validation/tools/AnalogyTransparencyResults2.csv")
+```
+
+
+```{python}
+```
+
