@@ -130,7 +130,7 @@ remove_other_characters <- function(line) {
   invisible (
     line %>%
       stringr::str_remove_all("\\\\\\d*\\\\") %>% # remove footnote references
-      stringr::str_remove("[^[:print:]]") # other non-alphanumeric characters
+      stringr::str_remove_all("[^[:print:]]") # other non-alphanumeric characters
   )
 }
 
@@ -308,7 +308,6 @@ preserve_ngrams_in_corpus <- function(corpus) {
   library(furrr)
   library(parallel)
 
-  plan(multiprocess)
 
   # load list ngrams to preserve
   if (!exists("tax_ngrams")) {
@@ -344,6 +343,7 @@ preserve_ngrams_in_corpus <- function(corpus) {
     )
   }
 
+  plan(multiprocess)
   corpus <- future_map(corpus_chunks, replace_ngram_in_chunk, pattern = ngram_patterns)
 
   invisible (unname(unlist(corpus)))
