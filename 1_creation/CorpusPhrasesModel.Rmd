@@ -1,0 +1,72 @@
+---
+title: "EmbedPhrasesModel"
+author: "AlexanderWold_Z1817662"
+date: "6/29/2021"
+output: pdf_document
+---
+```{r}
+# load packages
+library(reticulate)
+library(stringr)
+library(tokenizers)
+```
+
+```{r, warning = FALSE, message = FALSE}
+# load the IRC corpus and process it if necessary
+IRCpath <- "/home/alex/Projects/taxembed/data/corpora/rda/irc26.rda"
+load(IRCpath)
+source("/home/alex/Projects/taxembed/1_creation/process_corpus.R")
+irc26 <- prepare_corpus(irc26)
+irc26 <- tokenize_corpus(irc26, remove_stopwords = TRUE, remove_tax_stopwords = TRUE)
+r_to_py(irc26)
+```
+
+```{python}
+# train the phrases model
+from gensim.models.phrases import Phrases, Phraser
+
+# train the bigram and trigram
+bigram_irc = Phrases(r.irc26)
+trigram_irc = Phrases(bigram[r.irc26])
+
+# save the bigram and the trigram
+bigram_irc.save("/home/alex/Projects/taxembed/1_creation/bigram_irc.pkl")
+trigram_irc.save("/home/alex/Projects/taxembed/1_creation/trigram_irc.pkl")
+```
+
+```{python}
+# create example terms
+test_grams = [["internal", "revenue"],
+              ["internal", "revenue", "service"],
+              ["higher", "tax"],
+              ["higher", "tax", "rates"],
+              ["intellectual", "property"],
+              ["intellectual", "property", "rights"],
+              ["long-term", "capital", "gain"],
+              ["long-term", "capital", "gain", "rate"],
+              ["temporary", "assistance"],
+              ["temporary", "assistance", "for", "needy", "families"]]
+              
+all_test_grams = ["internal", "revenue",
+                  "internal", "revenue", "service",
+                  "higher", "tax",
+                  "higher", "tax", "rates",
+                  "intellectual", "property",
+                  "intellectual", "property", "rights",
+                  "long-term", "capital", "gain",
+                  "long-term", "capital", "gain", "rate",
+                  "temporary", "assistance",
+                  "temporary", "assistance", "for", "needy", "families"]
+              
+
+for ngram in test_grams:
+  print(trigram_irc[bigram_irc[ngram]])
+  print()
+
+print(trigram_irc[bigram_irc[all_test_grams]])
+```
+
+```{python}
+
+```
+

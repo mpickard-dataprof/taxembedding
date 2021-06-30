@@ -1,0 +1,79 @@
+---
+title: "PhrasesModel"
+author: "AlexanderWold_Z1817662"
+date: "6/23/2021"
+output: pdf_document
+---
+
+```{r}
+# load packages
+library(reticulate)
+library(stringr)
+library(tokenizers)
+
+# load the instructions (as object instext)
+textpath <- "/home/alex/Projects/taxembed/data/corpora/irs_corpi/instructions.rda"
+load(textpath)
+```
+
+
+```{r}
+# create example corpus
+excor <- paste(instext[1], instext[2], instext[3], instext[4], instext[5], instext[6])
+testcor <- instext[7]
+
+# replace regex characters and duplicate spaces
+excor <- str_replace_all(excor, pattern = "(\\n|\\t)+", replacement = " ")
+excor <- str_replace_all(excor, pattern = "\\s{2,}", replacement = " ")
+testcor <- str_replace_all(testcor, pattern = "(\\n|\\t)+", replacement = " ")
+testcor <- str_replace_all(testcor, pattern = "\\s{2,}", replacement = " ")
+
+# tokenize the string into sentences
+sentences <- unlist(tokenize_sentences(excor))
+testsents <- unlist(tokenize_sentences(testcor))
+
+# tokenize the sentences into words
+words <- lapply(sentences, tokenize_words)
+twords <- lapply(testsents, tokenize_words)
+
+# unlist the secondary lists for proper form
+for (i in 1:length(words)) {
+  words[[i]] <- unlist(words[i])
+}
+
+for (i in 1:length(twords)) {
+  twords[[i]] <- unlist(twords[i])
+}
+
+# convert the r object to a python object (# access with r.words in python chunk)
+r_to_py(words)
+r_to_py(twords)
+```
+
+
+
+```{python, warning = FALSE, message = FALSE}
+from gensim.models.phrases import Phrases, Phraser
+
+# first train a bigram
+bigram = Phrases(r.words)
+trigram = Phrases(bigram[r.words])
+```
+
+```{python, warning = FALSE, message = FALSE}
+# print the original sentence
+print("Original Sentence:")
+print(r.twords[86])
+
+# run the sentence through the trigram model
+print(f"\n\nPhrased Sentence:")
+print(trigram[bigram[r.twords[86]]])
+```
+
+```{python}
+```
+
+```{python}
+print(trigram.vocab)
+```
+
