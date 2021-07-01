@@ -1,0 +1,327 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# case.law 
+
+## Download case data
+
+First, get a list of all courts with "tax" in name
+```{r}
+library(httr)
+library(jsonlite)
+library(dplyr)
+
+taxcourt_url <- "https://api.case.law/v1/courts/?name=tax"
+
+courts <- fromJSON(
+  content(GET(taxcourt_url), "text", encoding = "utf8"),
+  flatten = TRUE, simplifyDataFrame = TRUE)
+
+court_ids <- courts$results %>% select(id)
+
+courts$results
+```
+
+Now download the cases for each court.
+```{r}
+case_endpoint <- "https://api.case.law/v1/cases/?full_case=true&court_id=12231"
+
+
+cases_json <- content(
+  GET(case_endpoint, add_headers(Authorization='Token ea803ecf0ca18cca2fe0f8cc536740feb7e9cc6b')), 
+  "text", encoding = "utf8")
+  
+cases <- fromJSON(cases_json, flatten = TRUE, simplifyDataFrame = TRUE)
+
+
+data_df <- cases$results[1:100,]$casebody.data.opinions
+
+opinions_text <- data_df %>% pull(text)
+```
+
+## Parse json
+```{r}
+library(tidyverse)
+library(jsonlite)
+json_path <- "~/temp/tc500.json"
+results <- fromJSON(json_path)$results[1:500,]
+
+data_df <- results$casebody$data
+
+opinions_text <- unnest(data_df, opinions)$text %>% 
+  str_remove_all("[^[:print:]]")
+
+## NOTE: opinions_text is what needs to be saved as an RDA file
+head(opinions_text)
+```
+
+## Retrieve all cases that contain "tax"
+
+ACTIVE CODE!  USE THIS!
+
+```{r}
+library(httr)
+library(jsonlite)
+library(dplyr)
+library(stringr)
+
+#courtlistener_courts <- c("ortc", "tax", "bta")
+#courtlistener_courts <- c("or-tc", "tc", "bta-1")
+
+case_url <- "https://api.case.law/v1/cases/?search=tax&full_case=true&page_size=2000"
+
+`%notin%` <-  Negate(`%in%`)
+
+cases_df <- data.frame()
+
+while (!is.null(case_url)) {
+  cases_json <- content(GET(
+    case_url,
+    add_headers(Authorization = 'Token ea803ecf0ca18cca2fe0f8cc536740feb7e9cc6b')
+  ),
+  "text", encoding = "utf8")
+  
+  if (validate(cases_json)) {
+    cases <-
+      fromJSON(cases_json,
+               flatten = TRUE,
+               simplifyDataFrame = TRUE)
+    
+    results <- cases$results %>%
+      # filter(court.slug %notin% courtlistener_courts) %>%
+      select(
+        name,
+        url,
+        court.id,
+        court.name,
+        court.slug,
+        jurisdiction.id,
+        jurisdiction.name_long,
+        jurisdiction.name,
+        jurisdiction.slug,
+        analysis.word_count,
+        analysis.ocr_confidence,
+        casebody.data.head_matter,
+        casebody.data.opinions,
+        casebody.status
+      )
+    
+    cases_df <- cases_df %>% bind_rows(results)
+    
+    case_url <- cases$`next`
+  } else {
+    print(str_glue("{case_url} is not valid JSON."))
+    Sys.sleep(180)
+  }
+  
+  
+}
+
+# write_json(cases_df, "/data/rstudio/caselaw/case-law-contains-tax.json")
+saveRDS(cases_df, "/data/rstudio/caselaw/case-law-contains-tax.rds")
+
+```
+
+
+# Parse the cases JSON
+
+**Decision:** I decided it would not hurt to have duplicate cases between "case.law" and Court Listener. The major overlap is between US Board of Tax Appeals (CList has 1,000 more cases) and US Tax Court (CList had twice as many cases).  Not sure what the overlap is. But the bulk files from CList did not have the docket number or case name, so it was not trivial to compare case sets.  So, I will just extract the opinion text from the CLaw cases.
+
+
+
+```{r}
+
+# WARNING: this takes a while to load. So only load it, if it's not already in memory.
+if (!exists("cl_cases")) {
+  cl_cases <- readRDS("/data/rstudio/caselaw/case-law-contains-tax.rds")
+}
+
+opinion_text <- cl_cases %>% unnest(casebody.data.opinions) %>% select(text)
+
+
+
+```
+
+
+
+
+
+# Court Listener
+I created a table in a Word doc. I counted the number of cases from each court. There was overlap with case.law.  But there were 10,000s of more cases in both the U.S. Tax courts (bta, tax) than in case.law.
+```{r}
+base_url <- "https://www.courtlistener.com/api/bulk-data/opinions/{court}.tar.gz"
+courts <- c("bta", "tax", "ortc", "monttc")
+urls <- str_replace(base_url, "\\{court\\}", courts)
+court_df <- tibble(court = courts , url = urls)
+
+download_court <- function(court, url) {
+
+  #TODO: add tryCatch code for download and untar errors
+  file_path <- path(tempdir(), path_file(url))
+  download.file(url, file_path)
+  
+  court_dir <- path(tempdir(), court)
+  if (!dir_exists(court_dir)) {
+    dir_create(court_dir)
+  } 
+  untar(file_path, exdir = court_dir)
+
+}
+
+download_courts <- function() {
+  require(purrr)
+  invisible(pmap(court_df, download_court))
+}
+
+download_courts()
+```
+
+Get a count for how many of the cases have text in the following JSON fields:
+
+* plain_text
+* html
+* html_lawbox
+* html_columbia
+* xml_harvard
+* html_with_citations
+
+```{r}
+library(stringi)
+library(rvest)
+library(xml2)
+library(furrr)
+library(fs)
+
+json_list <- fs::dir_ls(path(tempdir(),courts))
+
+is.textavailable <- function(object) {
+  if(!is.null(object)) {
+    if(!stri_isempty(object))
+      return(TRUE)
+  }
+  return(FALSE)
+}
+
+extract_text_from_case_inner <- function(json_path) {
+  json <- fromJSON(json_path)
+  case_text <- ""
+  
+  if (is.textavailable(json$plain_text)) {
+    case_text <- str_c(case_text, json$plain_text)
+  }
+  
+  if (is.textavailable(json$html)) {
+    text <- html_text(read_html(json$html))
+    case_text <- str_c(case_text, text)
+  }
+  
+  if (is.textavailable(json$html_lawbox)) {
+    text <- html_text(read_html(json$html_lawbox))
+    case_text <- str_c(case_text, text)
+  }
+  
+  if (is.textavailable(json$html_columbia)) {
+    text <- html_text(read_html(json$html_columbia))
+    case_text <- str_c(case_text, text)
+  }
+  
+  if (is.textavailable(json$xml_harvard)) {
+    x <- read_xml(json$xml_harvard)
+    nodes <- xml_find_all(x, "//text()")
+    text <- str_c(as_list(nodes), collapse = " ")
+    case_text <- str_c(case_text, text)
+  }
+  
+  # NOTE: In the future, courtlistener.com will place the final web page html in the "html_with_citations" section, so you could just grab it from there regardless of its original source.  (https://www.courtlistener.com/api/rest-info/#opinion-endpoint)
+
+  invisible(case_text)
+}
+
+extract_text_from_case <- function(json_path) {
+  tryCatch(
+    text <- extract_text_from_case_inner(json_path),
+    error = function(cond) {
+      message(str_glue("Error extracting text from {json_path}"))
+    }
+  )
+}
+
+plan(multicore, workers = 10)
+text <- as.vector(furrr::future_map_chr(json_list, extract_text_from_case))
+
+
+```
+
+# case.law API download
+
+This code is stale!
+
+I decided to download all the results from a search with "tax" and then remove courts that I downloaded with courtlistener.
+
+```{r}
+base_url <- "https://api.case.law/v1/cases/?court={court}"
+courts <- c("ariz-tax-ct","bta","hudson-cty-bd-tax","ind-tc","mass-app-t-bd","nj-dept-taxation-finance","nj-div-tax-app","njbta","njbta-1","njbt-assessment","ohio-bta","nj-tax-ct")
+urls <- str_replace(base_url, "\\{court\\}", courts)
+court_df <- tibble(court = courts , url = urls)
+
+download.file("https://api.case.law/v1/courts/?name=tax", destfile = "./courts.json")
+```
+
+
+# Benchmark
+
+Based on the below tests, it is significantly faster to write and read uncompressed files:
+
+* write 14x faster, but the file is 3x larger
+* read 3x faster to read
+
+So, I don't plan to generate near as many permutations of embeddings, which consumed most of our HDD space. On our 4 GB HDD, should have sufficient room for uncompressed files. 
+
+This means that I need to switch from RDA files (save/load) to RDS files (saveRDS/readRDS).
+
+```{r}
+library(microbenchmark)
+library(trqwe)
+
+# compressed size = 4.3M
+# uncompressed size = 14M
+# uncompressed is 3x larger, but 14x faster
+microbenchmark(saveRDS(cl_cases[1:1000,], "/data/rstudio/compressed.rds"), 
+               saveRDS(cl_cases[1:1000,], file="/data/rstudio/uncompressed.rds", compress = FALSE))
+
+
+# compressed size = 4.3M
+# uncompressed size = 14M
+# compressed_pigz size = 4.3M
+# uncompressed is 3x larger, but 14x faster
+microbenchmark(saveRDS(cl_cases[1:1000,], file="/data/rstudio/compressed.rds"), 
+               saveRDS(cl_cases[1:1000,], file="/data/rstudio/uncompressed.rds", compress = FALSE),
+               mcsaveRDS(cl_cases[1:1000,], file="/data/rstudio/compressed_pigz.rds", mc.cores = 8))
+
+
+microbenchmark(readRDS(file = "/data/rstudio/compressed.rds"), 
+               readRDS(file="/data/rstudio/uncompressed.rds"),
+               mcreadRDS(file="/data/rstudio/compressed_pigz.rds", mc.cores = 8))
+
+
+library(tictoc)
+
+tic()
+saveRDS(cl_cases, file="/data/rstudio/compressed.rds")
+toc()
+# 635.736 sec elapsed
+
+tic()
+saveRDS(cl_cases, file="/data/rstudio/uncompressed.rds", compress = FALSE)
+toc()
+# 37.053 sec elapsed
+
+
+tic()
+mcsaveRDS(cl_cases, file="/data/rstudio/compressed_pigz.rds", mc.cores = 8)
+toc()
+# 82.614 sec elapsed
+```
+

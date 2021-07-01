@@ -3,41 +3,48 @@ library(xml2)
 library(stringr)
 library(fs)
 
+rds_dir <- "/data/rstudio/rds"
+rds_path <- path(rds_dir, "irc26.rds")
+
+temp_dir <- "/data/rstudio/temp"
+temp_file_path <- path(temp_dir, "usc26.xml")
+
 download_irc26 <- function() {
 
-  ## TODO: to download latest version, could scrape all URLs on "https://uscode.house.gov/download/download.shtml" filter
-  ## out URL with "xml_usc26" in it and use that as the "irc26_url" url path.
-
   irc26_url <- "https://uscode.house.gov/download/releasepoints/us/pl/116/138not113/xml_usc26@116-138not113.zip"
-  file_path <- path(tempdir(), "usc26xml.zip")
-  download.file(irc26_url, file_path)
-  unzip(file_path, exdir = "data/corpora")
+  tempfile <- path(tempdir(), "usc26xml.zip")
+  download.file(irc26_url, tempfile)
+  unzip(tempfile, exdir = temp_dir)
 
 }
 
 
 extract_irc26 <- function(removeNotes = TRUE, removeTOC = TRUE) {
 
-  ### NOTE: I believe 'use_data()' sets up lazy loading of these data sets.
-  ### So, no need to explicitly load them. They are saved by 'use_data()'
-  ### as .rda files anyway
-  ###
-  # cleaned_file_path <- file.path("data", "cleaned_irc26.rds")
-  #
-  # if (file_exists(cleaned_file_path) && !force_refresh) {
-  #   irc26 <- readRDS(cleaned_file_path)
-  #   invisible(irc26)
-  # }
+  rds_dir <- "/data/rstudio/rds"
+  rds_path <- path(rds_dir, "irc26.rds")
+  
+  temp_dir <- "/data/rstudio/temp"
+  temp_file_path <- path(temp_dir, "usc26.xml")
 
-  raw_file_path <- file.path("data/corpora", "usc26.xml")
-
-  if (!file_exists(raw_file_path)) {
+  message("-----Extracting IRC26-----")
+  
+  # if the file has already been downloaded and processed, just load the RDS
+  # and return the data
+  if(file_exists(rds_path)) {
+    message(str_glue("'{rds_path}' exists. Loading and returning."))
+    irc26 <- readRDS(rds_path)
+    return(invisible(irc26))
+  }
+  
+  # only download if necessary
+  if (!file_exists(temp_file_path)) {
     message("downloading usc26xml.zip...")
     download_irc26()
   }
 
   message("reading usc26.xml...")
-  xml <- read_xml(raw_file_path)
+  xml <- read_xml(temp_file_path)
 
   ## Some <section> nodes are contained inside <notes>
   ## -- begin <section> count = 2217 -- this includes all <section> nodes, some of
@@ -110,16 +117,9 @@ extract_irc26 <- function(removeNotes = TRUE, removeTOC = TRUE) {
 
   irc26 <- sapply(sections, extract_text_from_node)
   # saveRDS(irc26, "data/cleaned_irc26.rds")
-  message("saving irc26.rda...")
-  usethis::use_data(irc26, overwrite = TRUE)
-  invisible(irc26)
-
-}
-
-
-out_file_path <- file.path("data", "irc26.rda")
-if (!file_exists(out_file_path)) {
-  extract_irc26()
-} else {
-  message(paste(out_file_path, "already exists. Skipping."))
+  message("saving irc26.rds...")
+  
+  saveRDS(irc26, rds_path, compress = FALSE)
+  
+  return(invisible(irc26))
 }
