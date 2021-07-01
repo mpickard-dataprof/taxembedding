@@ -1,25 +1,20 @@
 source("1_creation/R/process_corpus.R")
-source("1_creation/R/load_corpus.R")
+
 
 library(dplyr)
 library(fs)
 library(readr)
+library(purrr)
+library(tidyr)
 
 ## PATHS FOR OUTPUTS
 EMBED_PATH = '/data/rstudio/embeddings'
-CORPI_PATH = '/home/mpickard/Projects/taxembed/data/corpi'
+CORPI_PATH = '/data/rstudio/corpi'
 
 generateEmbeddings <- function() {
 
-  library(tidyr)
-  library(furrr)
-  library(purrr)
-  plan(multiprocess)
-
-
   # num_cores <- availableCores() / 2
   num_cores <- 12
-  plan(multiprocess, workers = num_cores)
 
   ## check if 'corpi' and 'embeddings' directories exists
   ## if not, create them
@@ -55,8 +50,7 @@ generateEmbeddings <- function() {
 
 
   ## this generates the corpus permutations and saves them to disk
-  corpus_param_df <-  corpus_param_df %>% future_pmap_dfr(generate_corpus)
-  # corpus_param_df %>% future_pwalk(generate_corpi)
+  corpus_param_df <-  corpus_param_df %>% pmap_dfr(generate_corpus)
 
   embed_param_df <- expand_grid(corpus_param_df,
                                 type,
@@ -86,6 +80,9 @@ generateEmbeddings <- function() {
 ## whether the user wants stopwords removed, preserve irc refs, etc.
 generate_corpus <- function(remove_stopwords, preserve_code_references, preserve_ngrams) {
 
+  ## IMPORTANT: I made the process_corpus function multisession, so multisession
+  ## programming should not be used here when generating the corpus.
+  
   filename <-  paste0("sw-", str_sub(tolower(!remove_stopwords), 1, 1),
                       "_refs-", str_sub(tolower(preserve_code_references), 1, 1),
                       "_ngrams-", str_sub(tolower(preserve_ngrams), 1, 1))
@@ -112,7 +109,7 @@ generate_corpus <- function(remove_stopwords, preserve_code_references, preserve
     corpus <-
       tokenize_corpus(corpus, remove_stopwords = remove_stopwords)
 
-    saveRDS(corpus, corpus_path)
+    saveRDS(corpus, corpus_path, compress = FALSE)
   }
 
   # invisible(corpus)
