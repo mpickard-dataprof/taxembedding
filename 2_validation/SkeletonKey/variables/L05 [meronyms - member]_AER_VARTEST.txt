@@ -1,0 +1,30 @@
+[1] "analogy"
+                        term          contrast null.value estimate conf.low conf.high adj.p.value
+1                 Stopwords.        True-False          0   0.2794   0.0514    0.5074      0.0164
+2      References.Preserved.        True-False          0   0.0904  -0.1382    0.3189      0.4381
+3         Training.Algorithm Word2Vec-FastText          0  -0.7046  -0.9294   -0.4797      0.0000
+4                    Ngrams.        True-False          0  -0.0645  -0.2931    0.1641      0.5800
+5                 Dimensions           256-128          0  -0.5463  -0.9391   -0.1536      0.0020
+6                 Dimensions            32-128          0  -1.0316  -1.5036   -0.5596      0.0000
+7                 Dimensions            64-128          0  -0.2560  -0.6930    0.1810      0.4333
+8                 Dimensions            32-256          0  -0.4852  -0.9166   -0.0539      0.0202
+9                 Dimensions            64-256          0   0.2903  -0.1024    0.6830      0.2277
+10                Dimensions             64-32          0   0.7756   0.3036    1.2476      0.0001
+11                    Window              20-2          0   0.5632   0.1605    0.9658      0.0030
+12                    Window               8-2          0   0.4584   0.0761    0.8408      0.0138
+13                    Window              8-20          0  -0.1047  -0.4083    0.1989      0.6972
+14   Minimum.Count.Threshold             20-10          0   0.2336  -0.2052    0.6724      0.5188
+15   Minimum.Count.Threshold              5-10          0  -0.4821  -0.9209   -0.0433      0.0247
+16   Minimum.Count.Threshold             50-10          0  -0.7042  -1.2073   -0.2012      0.0019
+17   Minimum.Count.Threshold              5-20          0  -0.7156  -1.0790   -0.3523      0.0000
+18   Minimum.Count.Threshold             50-20          0  -0.9378  -1.3766   -0.4990      0.0000
+19   Minimum.Count.Threshold              50-5          0  -0.2222  -0.6609    0.2166      0.5614
+20 Number.of.Training.Epochs              20-2          0   1.3783   0.9094    1.8471      0.0000
+21 Number.of.Training.Epochs               5-2          0  -0.3196  -0.7766    0.1374      0.2742
+22 Number.of.Training.Epochs               8-2          0  -0.3264  -0.9007    0.2478      0.4607
+23 Number.of.Training.Epochs              5-20          0  -1.6978  -2.0124   -1.3833      0.0000
+24 Number.of.Training.Epochs              8-20          0  -1.7047  -2.1735   -1.2358      0.0000
+25 Number.of.Training.Epochs               8-5          0  -0.0068  -0.4638    0.4502      1.0000
+
+
+

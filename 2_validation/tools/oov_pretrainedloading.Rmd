@@ -1,0 +1,76 @@
+---
+title: "Untitled"
+author: "AlexanderWold_Z1817662"
+date: "2/22/2021"
+output: pdf_document
+---
+```{r}
+library(reticulate)
+```
+
+```{python}
+import gensim
+import csv
+import gensim.downloader as gd
+```
+
+```{python}
+MODEL_PATH = "/data/rstudio/embeddings/sw_refs_w2v_no_ngrams_d_64_w_8_mwo_5_e_5"
+ANALOGY_FILE = "/home/alex/Projects/taxembed/2_validation/SkeletonKey/input/analogies/L10 [antonyms - binary].txt"
+
+# evaluate the analogies
+loaded_model = gensim.models.Word2Vec.load(MODEL_PATH)
+```
+
+```{python}
+ao = loaded_model.wv.evaluate_word_analogies(ANALOGY_FILE)
+```
+
+```{python}
+totnumtried = len(ao[1][-1]["correct"])+len(ao[1][-1]["incorrect"])
+print(totnumtried)
+
+allanalogies = (len(open(ANALOGY_FILE).readlines())-1)
+print(count)
+
+(allanalogies - totnumtried)/allanalogies
+```
+```{python}
+ao[1][-1]["incorrect"]
+
+
+loaded_model.most_similar(positive=["later", "before"], negative=["previously"], topn=10)
+
+
+```
+
+
+
+```{python}
+del loaded_model
+```
+
+
+
+
+```{python}
+PTH = "/home/alex/Projects/taxembed/2_validation/SkeletonKey/test_pre"
+
+# load the google news 300 pretrained model
+premodel = gd.load("word2vec-google-news-300")
+```
+
+
+
+```{python}
+premodel.save("/home/alex/Projects/taxembed/2_validation/SkeletonKey/test_pre/nosw_norefs_w2v_no_ngrams_d_0_w_0_mwo_0_e_0")
+```
+
+```{python}
+ldmdl = gensim.models.KeyedVectors.load("/home/alex/Projects/taxembed/2_validation/SkeletonKey/test_pre/nosw_norefs_w2v_no_ngrams_d_0_w_0_mwo_0_e_0")
+```
+
+```{python}
+ldmdl.evaluate_word_analogies
+```
+

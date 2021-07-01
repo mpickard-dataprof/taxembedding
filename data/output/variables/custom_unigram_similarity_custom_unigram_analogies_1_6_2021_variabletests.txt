@@ -1,0 +1,94 @@
+
+> print_tibble(out_list)
+[1] "pearson"
+                pearson.term pearson.comparison pearson.estimate pearson.conf.low pearson.conf.high pearson.adj.p.value
+1                 Stopwords.         True-False          -0.0109          -0.0231            0.0013              0.0810
+2      References.Preserved.         True-False          -0.0052          -0.0174            0.0070              0.4041
+3         Training.Algorithm  Word2Vec-FastText           0.1178           0.1077            0.1279              0.0000
+4                    Ngrams.         True-False           0.0894           0.0784            0.1004              0.0000
+5                 Dimensions            256-128          -0.0576          -0.0772           -0.0381              0.0000
+6                 Dimensions             32-128          -0.0732          -0.0967           -0.0497              0.0000
+7                 Dimensions             64-128           0.0350           0.0133            0.0567              0.0002
+8                 Dimensions             32-256          -0.0156          -0.0370            0.0059              0.2425
+9                 Dimensions             64-256           0.0926           0.0731            0.1122              0.0000
+10                Dimensions              64-32           0.1082           0.0847            0.1317              0.0000
+11                    Window               20-2           0.1535           0.1347            0.1722              0.0000
+12                    Window                8-2           0.1061           0.0883            0.1239              0.0000
+13                    Window               8-20          -0.0474          -0.0615           -0.0333              0.0000
+14   Minimum.Count.Threshold              20-10          -0.0337          -0.0572           -0.0102              0.0013
+15   Minimum.Count.Threshold               5-10          -0.0392          -0.0627           -0.0157              0.0001
+16   Minimum.Count.Threshold              50-10           0.0088          -0.0181            0.0357              0.8365
+17   Minimum.Count.Threshold               5-20          -0.0055          -0.0250            0.0139              0.8850
+18   Minimum.Count.Threshold              50-20           0.0425           0.0190            0.0659              0.0000
+19   Minimum.Count.Threshold               50-5           0.0480           0.0245            0.0715              0.0000
+20 Number.of.Training.Epochs               20-2           0.1078           0.0822            0.1334              0.0000
+21 Number.of.Training.Epochs                5-2           0.0630           0.0380            0.0880              0.0000
+22 Number.of.Training.Epochs                8-2           0.0195          -0.0119            0.0509              0.3804
+23 Number.of.Training.Epochs               5-20          -0.0448          -0.0620           -0.0276              0.0000
+24 Number.of.Training.Epochs               8-20          -0.0883          -0.1139           -0.0627              0.0000
+25 Number.of.Training.Epochs                8-5          -0.0435          -0.0685           -0.0185              0.0000
+
+
+
+[1] "spearman"
+               spearman.term spearman.comparison spearman.estimate spearman.conf.low spearman.conf.high spearman.adj.p.value
+1                 Stopwords.          True-False           -0.0213           -0.0310            -0.0117               0.0000
+2      References.Preserved.          True-False           -0.0050           -0.0147             0.0047               0.3137
+3         Training.Algorithm   Word2Vec-FastText            0.0302            0.0206             0.0397               0.0000
+4                    Ngrams.          True-False            0.0598            0.0507             0.0688               0.0000
+5                 Dimensions             256-128           -0.0280           -0.0430            -0.0130               0.0000
+6                 Dimensions              32-128           -0.1102           -0.1282            -0.0922               0.0000
+7                 Dimensions              64-128           -0.0014           -0.0181             0.0152               0.9962
+8                 Dimensions              32-256           -0.0822           -0.0987            -0.0658               0.0000
+9                 Dimensions              64-256            0.0265            0.0115             0.0415               0.0000
+10                Dimensions               64-32            0.1088            0.0908             0.1268               0.0000
+11                    Window                20-2            0.1620            0.1491             0.1749               0.0000
+12                    Window                 8-2            0.1035            0.0912             0.1157               0.0000
+13                    Window                8-20           -0.0585           -0.0683            -0.0488               0.0000
+14   Minimum.Count.Threshold               20-10           -0.0415           -0.0598            -0.0231               0.0000
+15   Minimum.Count.Threshold                5-10           -0.0460           -0.0643            -0.0276               0.0000
+16   Minimum.Count.Threshold               50-10            0.0030           -0.0181             0.0240               0.9837
+17   Minimum.Count.Threshold                5-20           -0.0045           -0.0197             0.0107               0.8712
+18   Minimum.Count.Threshold               50-20            0.0444            0.0261             0.0628               0.0000
+19   Minimum.Count.Threshold                50-5            0.0489            0.0306             0.0673               0.0000
+20 Number.of.Training.Epochs                20-2            0.0981            0.0783             0.1179               0.0000
+21 Number.of.Training.Epochs                 5-2            0.0837            0.0643             0.1030               0.0000
+22 Number.of.Training.Epochs                 8-2            0.0213           -0.0029             0.0456               0.1078
+23 Number.of.Training.Epochs                5-20           -0.0144           -0.0277            -0.0011               0.0273
+24 Number.of.Training.Epochs                8-20           -0.0768           -0.0966            -0.0569               0.0000
+25 Number.of.Training.Epochs                 8-5           -0.0623           -0.0816            -0.0430               0.0000
+
+
+
+[1] "analogy"
+                analogy.term analogy.comparison analogy.estimate analogy.conf.low analogy.conf.high analogy.adj.p.value
+1                 Stopwords.         True-False           2.0942           1.1459            3.0424              0.0000
+2      References.Preserved.         True-False           0.0487          -0.9074            1.0048              0.9204
+3         Training.Algorithm  Word2Vec-FastText           7.9708           7.1368            8.8047              0.0000
+4                    Ngrams.         True-False           0.0812          -0.8750            1.0373              0.8677
+5                 Dimensions            256-128          -1.7373          -3.3843           -0.0903              0.0341
+6                 Dimensions             32-128           1.2311          -0.7484            3.2105              0.3789
+7                 Dimensions             64-128           1.1719          -0.6607            3.0045              0.3536
+8                 Dimensions             32-256           2.9684           1.1594            4.7773              0.0002
+9                 Dimensions             64-256           2.9092           1.2622            4.5562              0.0000
+10                Dimensions              64-32          -0.0592          -2.0386            1.9203              0.9998
+11                    Window               20-2          -0.7576          -2.4488            0.9337              0.5447
+12                    Window                8-2          -0.2952          -1.9014            1.3110              0.9025
+13                    Window               8-20           0.4623          -0.8130            1.7377              0.6714
+14   Minimum.Count.Threshold              20-10           1.2022          -0.6558            3.0602              0.3429
+15   Minimum.Count.Threshold               5-10           1.1775          -0.6805            3.0355              0.3617
+16   Minimum.Count.Threshold              50-10           3.0303           0.9002            5.1604              0.0015
+17   Minimum.Count.Threshold               5-20          -0.0247          -1.5633            1.5139              1.0000
+18   Minimum.Count.Threshold              50-20           1.8281          -0.0299            3.6861              0.0557
+19   Minimum.Count.Threshold               50-5           1.8528          -0.0052            3.7108              0.0510
+20 Number.of.Training.Epochs               20-2          -4.9006          -6.9844           -2.8167              0.0000
+21 Number.of.Training.Epochs                5-2          -1.1364          -3.1675            0.8947              0.4749
+22 Number.of.Training.Epochs                8-2          -3.6222          -6.1744           -1.0700              0.0016
+23 Number.of.Training.Epochs               5-20           3.7642           2.3663            5.1621              0.0000
+24 Number.of.Training.Epochs               8-20           1.2784          -0.8055            3.3623              0.3914
+25 Number.of.Training.Epochs                8-5          -2.4858          -4.5169           -0.4547              0.0091
+
+
+
+
+> sink()

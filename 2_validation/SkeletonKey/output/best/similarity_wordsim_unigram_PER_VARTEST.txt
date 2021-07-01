@@ -1,0 +1,28 @@
+[1] "pearson"
+                       term   contrast null.value estimate conf.low conf.high adj.p.value
+1                Stopwords. True-False          0  -0.0640      NaN       NaN         NaN
+2                Dimensions       64-0          0  -0.0854      NaN       NaN         NaN
+3                    Window       20-0          0  -0.0711      NaN       NaN         NaN
+4                    Window        8-0          0  -0.0996      NaN       NaN         NaN
+5                    Window       8-20          0  -0.0285      NaN       NaN         NaN
+6   Minimum.Count.Threshold       20-0          0  -0.0996      NaN       NaN         NaN
+7   Minimum.Count.Threshold       50-0          0  -0.0711      NaN       NaN         NaN
+8   Minimum.Count.Threshold      50-20          0   0.0285      NaN       NaN         NaN
+9 Number.of.Training.Epochs       20-0          0  -0.0854      NaN       NaN         NaN
+
+
+
+[1] "spearman"
+                       term   contrast null.value estimate conf.low conf.high adj.p.value
+1                Stopwords. True-False          0  -0.1210      NaN       NaN         NaN
+2                Dimensions       64-0          0  -0.1119      NaN       NaN         NaN
+3                    Window       20-0          0  -0.0685      NaN       NaN         NaN
+4                    Window        8-0          0  -0.1553      NaN       NaN         NaN
+5                    Window       8-20          0  -0.0868      NaN       NaN         NaN
+6   Minimum.Count.Threshold       20-0          0  -0.1553      NaN       NaN         NaN
+7   Minimum.Count.Threshold       50-0          0  -0.0685      NaN       NaN         NaN
+8   Minimum.Count.Threshold      50-20          0   0.0868      NaN       NaN         NaN
+9 Number.of.Training.Epochs       20-0          0  -0.1119      NaN       NaN         NaN
+
+
+

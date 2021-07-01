@@ -1,0 +1,14 @@
+[1] "analogy"
+                       term   contrast null.value estimate conf.low conf.high adj.p.value
+1                Stopwords. True-False          0   -12.19      NaN       NaN         NaN
+2                Dimensions       64-0          0   -17.96      NaN       NaN         NaN
+3                    Window       20-0          0   -15.82      NaN       NaN         NaN
+4                    Window        8-0          0   -20.10      NaN       NaN         NaN
+5                    Window       8-20          0    -4.28      NaN       NaN         NaN
+6   Minimum.Count.Threshold       20-0          0   -20.10      NaN       NaN         NaN
+7   Minimum.Count.Threshold       50-0          0   -15.82      NaN       NaN         NaN
+8   Minimum.Count.Threshold      50-20          0     4.28      NaN       NaN         NaN
+9 Number.of.Training.Epochs       20-0          0   -17.96      NaN       NaN         NaN
+
+
+

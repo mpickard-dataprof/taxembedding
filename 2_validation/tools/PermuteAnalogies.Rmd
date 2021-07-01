@@ -1,0 +1,105 @@
+---
+title: "Permute Analogies"
+author: "AlexanderWold_Z1817662"
+date: "2/14/2021"
+output: pdf_document
+---
+```{r}
+library(stringr)
+```
+
+
+```{r}
+# get list of BAT files
+BAT_PATH <- "~/Projects/taxembed/data/input/untallied/analogies/BATS"
+OUT_PATH <- "~/Projects/taxembed/data/output/tallied/analogies/BATS"
+files_list <- list.files(path = BAT_PATH, recursive = TRUE, full.names = TRUE)
+
+# define a function to get the name of the file from the path
+get_file_name <- function(path) {
+  fname <- unlist(str_split(path, pattern = "/"))
+  fname <- fname[length(fname)]
+  fname
+}
+
+
+# define a function to calculate the number of possible permutations
+perm = function(n, r) {
+  factorial(n) / factorial(n-r)
+}
+```
+
+
+```{r}
+# define a function to permute rows
+permute_analgies <- function(file, k = 100) {
+  
+  # read all of the lines
+  all_lines <- readLines(file)
+  
+  # separate header from analogies
+  header <- all_lines[1]
+  lines <- all_lines[-1]
+  
+  # create a containor for glued lines
+  glue_lines <- c()
+  
+  # expand rows
+  for (i in 1:length(lines)) {
+    # separate by tab
+    strip_line <- unlist(str_split(lines[i], pattern = "\\t"))
+    
+    # if there's multiple options for the last term
+    sep_line <- unlist(str_split(strip_line[2], pattern = "/"))
+    if (length(sep_line) > 1) {
+      # glue first part and all other parts together
+      for (j in 1:length(sep_line)) {
+        glue_line <- paste(strip_line[1], sep_line[j], sep = " ")
+        
+        # keep a record of glued lines
+        glue_lines <- append(glue_lines, glue_line)
+      }
+      # erase the composite line
+      lines <- lines[-i]
+    }
+  }
+  # add the separated lines
+  lines <- append(lines, glue_lines)
+  
+  # check the number of permutations
+  numperms <- perm(length(lines), 2)
+  
+  # check for Nan
+  if (is.nan(numperms)) numperms = k
+  
+  n_analogies <- 0
+  picks <- c(header)
+  
+  # permute the rows
+  while(n_analogies <= k & n_analogies <= numperms) {
+    pick <- unlist(sample(lines, 2))
+    pick <- paste(pick[1], pick[2], sep = " ")
+    pick <- str_replace_all(pick, "\\t", " ")
+    
+    if (!(pick %in% picks)) {
+      picks <- append(picks, pick)
+      n_analogies <- n_analogies+1
+    }
+  }
+  
+  picks
+}
+
+# write function to call the permute analogies function and write the output to a file
+write_permute <- function(filepath, output_path, ...) {
+  output_file_name <- paste(output_path, get_file_name(filepath), sep = "/")
+  write(permute_analgies(filepath, ...), output_file_name)
+}
+
+
+invisible(lapply(files_list, write_permute, output_path = OUT_PATH, k = 150))
+```
+
+```{r, warning = FALSE}
+```
+

@@ -1,0 +1,92 @@
+---
+title: "MergeValidations"
+author: "AlexanderWold_Z1817662"
+date: "3/8/2021"
+output: pdf_document
+---
+```{r}
+# load packages
+library(dbplyr)
+library(magrittr)
+library(stringr)
+
+# define 
+MERGE_DIRECTORY <- "/home/alex/Projects/taxembed/2_validation/SkeletonKey/output/analogies"
+```
+
+
+
+```{r}
+# recursively get all analogy files
+files <- list.files(path = MERGE_DIRECTORY, pattern = ".*_AER.csv", recursive = TRUE, full.names = TRUE)
+
+frame1 <- NULL
+
+# loop through each file
+for(i in 1:length(files)) {
+  
+  # construct column name from file name
+  fname <- tail(unlist(str_split(files[i], pattern = "/")), 1)
+  fname <- str_remove_all(fname, pattern = "\\s")
+  fname <- str_remove_all(fname, pattern = "_AER\\.csv")
+  
+  # if it's the first file, grab the entire csv
+  if(i == 1) {
+    frame1 <- read.csv(files[i], header = TRUE)
+    names(frame1) <- c(names(frame1)[-length(names(frame1))], fname)
+    next
+  }
+  
+  # if it's not the first file, grab only the model name and analogy score
+  frame2 <- read.csv(files[i], header = TRUE)[, c("Model.Name", "Overall.Analogy.Accuracy....")]
+  names(frame2) <- c("Model.Name", fname)
+  
+  # merge the data
+  frame1 <- inner_join(frame1, frame2, by = "Model.Name")
+}
+
+print(frame1)
+```
+
+```{r}
+just_scores <- frame1[, 11:ncol(frame1)]
+regmeans <- apply(just_scores, 1, mean)
+```
+
+```{r}
+weightframe <- read.csv("/home/alex/Projects/taxembed/2_validation/tools/test_category_weights.csv")
+weightframe <- weightframe[, c(1, 5)]
+
+weightframe$name <- str_remove_all(weightframe$name, pattern = "\\s")
+weightframe$name <- str_remove_all(weightframe$name, pattern = "_AER_VARTEST")
+
+weightframe
+```
+
+```{r}
+# create an empty data frame to hold the reindexed weights
+riframe <- data.frame(vector(mode = "character", length = nrow(weightframe)),
+                        vector(mode = "numeric", length = nrow(weightframe)))
+names(riframe) <- c("name", "weight")
+
+# reindex the data
+for(i in 1:ncol(just_scores)) {
+  riframe[match(weightframe$name[i], names(just_scores)), ] <- weightframe[i, ]
+}
+
+riframe
+```
+
+```{r}
+wmeans <- apply(just_scores, 1, weighted.mean, w = riframe$weight)
+
+all_means <- data.frame("mean" = regmeans, "weighted.mean" = wmeans)
+
+frame1 <- cbind(frame1, all_means)
+frame1
+```
+
+```{r}
+write.csv(frame1, "/home/alex/Projects/taxembed/2_validation/tools/AggregatedAnalogies.csv")
+```
+
