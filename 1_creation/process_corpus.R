@@ -1,5 +1,3 @@
-source("./1_creation/load_corpus.R")
-
 ##############################################################
 ##############################################################
 
@@ -10,6 +8,7 @@ source("./1_creation/load_corpus.R")
 library(stringr)
 library(stringi)
 library(purrr)
+library(furrr)
 library(assertthat)
 
 max_attempts <- 3
@@ -595,5 +594,10 @@ tokenize_corpus <- function(corpus,
                              strip_numeric = TRUE)
   }
 
-  return(invisible(tokens))
+  rettokens <- vector(mode = "list", length = length(tokens))
+  for (i in 1:length(tokens)) {
+    rettokens[[i]] <- unlist(tokens[[i]])
+  }
+  
+  return(invisible(rettokens))
 }

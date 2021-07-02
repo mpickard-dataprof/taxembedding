@@ -21,6 +21,7 @@ irc26 <- tokenize_corpus(irc26, remove_stopwords = TRUE, remove_tax_stopwords = 
 r_to_py(irc26)
 ```
 
+
 ```{python}
 # train the phrases model
 from gensim.models.phrases import Phrases, Phraser
@@ -28,8 +29,8 @@ from gensim.models.phrases import Phrases, Phraser
 # train the bigram and trigram
 bigram_irc = Phrases(r.irc26, threshold = 25)
 trigram_irc = Phrases(bigram_irc[r.irc26], threshold = 25)
-fourgram_irc = Phrases(trigram_irc[r.irc26], threshold = 25)
-fivegram_irc = Phrases(fourgram_irc[r.irc26], threshold = 25)
+fourgram_irc = Phrases(trigram_irc[bigram_irc[r.irc26]], threshold = 25)
+fivegram_irc = Phrases(fourgram_irc[trigram_irc[bigram_irc[r.irc26]]], threshold = 25)
 
 # save the bigram and the trigram
 bigram_irc.save("/home/alex/Projects/taxembed/1_creation/bigram_irc.pkl")
