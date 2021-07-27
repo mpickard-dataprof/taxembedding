@@ -4,6 +4,7 @@ library(xml2)
 library(rvest)
 library(purrr)
 library(furrr)
+library(tibble)
 
 
 ## A comparison between the CourtListener.com and case.law repositories.

@@ -21,7 +21,7 @@ tax_stopwords <- c(
   "subsection",
   "pub",
   "provided",
-  str_c(1:1200),
+  str_c(1:6200),
   "i",
   "ii",
   "iii",
@@ -446,44 +446,62 @@ join_ngram <- function(line) {
   )
 }
 
-# helper function to paste each ngram size together
-create_ngram_regex <- function(df, ngram_size) {
-  return (
-    df %>% filter(size == ngram_size) %>% pull(ngram) %>% str_c(collapse = "|")
-  )
+replace_ngrams <- function(line, pattern) {
+  
+  assert_that(is_character(line), length(line) == 1)
+  
+  if(stri_isempty(line)) return(character(1))
+  
+  text <- character(1)
+  attempt <- 0
+  
+  for(i in 1:max_attempts) {
+    attempt <- attempt + 1
+    try({
+      text <- line %>%
+        # replace the ngrams
+        # Place code here to replace ngram in a single line
+        str_replace_all(pattern, join_ngram)
+    }, silent = TRUE)
+    
+    if(!stri_isempty(text)) {
+      assert_that(is_character(line), 
+                  length(line) == 1, 
+                  msg = str_glue("'{match.call()[[1]]}()': return type is not character vector of length 1"))
+      return(invisible(text))
+    } 
+  } 
+  
+  line_head <- str_sub(line, 1, 100)
+  message(str_glue("'{match.call()[[1]]}()': reached max attempts. returning empty string. Line = {line_head}\n"))
+  return(invisible(character(1)))
+  
 }
 
-
-# helper function to split corpus into equal parts
-chunk_vector <- function(x,n) {
-  split(x, cut(seq_along(x), n, labels = FALSE))
-}
-
-
-
-preserve_ngrams_in_corpus <- function(corpus) {
-
+preserve_ngrams_in_corpus <- function(lines) {
+  
   library(readr)
+  library(dplyr)
   library(stringr)
+  library(purrr)
   library(furrr)
-  library(parallel)
 
-
+  assert_that(is_character(lines))
+  
   # load list ngrams to preserve
   if (!exists("tax_ngrams")) {
-    tax_ngrams <- read_csv(
-      "ngram_counts.csv",
-      col_types = cols(
-        ngram = col_character(),
-        size = col_integer(),
-        n = col_integer()
-      )
-    )
+    tax_ngrams <- read_csv("ngrams.csv")
   }
 
+  tax_ngrams <- tax_ngrams %>% 
+    mutate(size = ngram %>% str_count(boundary("word")))
+  
+  tax_ngrams <- tax_ngrams %>% filter(size > 1)
+  
   # assemble the regex pattern--largest ngrams first
   # the ngrams were generated empirically with other code, basically
   # selected ngrams that occur most frequently.
+  
   if (!exists("ngram_patterns")) {
     sizes <- rev(unique(tax_ngrams$size))
     ngram_patterns <-
@@ -491,25 +509,33 @@ preserve_ngrams_in_corpus <- function(corpus) {
     ngram_patterns <- str_c(ngram_patterns, collapse = "|")
   }
 
-  # chunk the corpus based on number of available cores
-  # numCores <- detectCores()
-  corpus_chunks <- chunk_vector(corpus, numCores)
-
-  replace_ngram_in_chunk <- function(chunk, pattern) {
-    chunk_list <- map(chunk, str_replace_all, pattern, replacement = join_ngram)
-    return(invisible(unlist(unname(chunk_list))))
-  }
-
-  tryCatch({
-    plan(multiprocess, workers = 8)
-    corpus <- future_map(corpus_chunks, replace_ngram_in_chunk, pattern = ngram_patterns)
-    },
-    error = function(cond) {
-      message(str_glue("ERROR standardizing references for this line \n: {line}"))
-      message(str_glue("The error conditon was: {cond}"))
-  })
-  return(invisible(unname(unlist(corpus))))
+  plan(multisession)
+  chr_vector <- future_map_chr(lines, replace_ngrams, pattern = ngram_patterns)
+  
+  return(invisible(chr_vector))
 }
+
+# helper function to paste each ngram size together
+create_ngram_regex <- function(df, ngram_size) {
+  return (
+    df %>% filter(size == ngram_size) %>% pull(ngram) %>% str_c(collapse = "|")
+  )
+}
+
+#### this appears to work on one index at a time anyway, so inside each
+#### chunk, it processes all indices.
+# replace_ngram_in_chunk <- function(chunk, pattern) {
+#   chunk_list <- map(chunk, str_replace_all, pattern, replacement = join_ngram)
+#   return(invisible(unlist(unname(chunk_list))))
+# }
+
+
+# helper function to split corpus into equal parts
+# chunk_vector <- function(x,n) {
+#   split(x, cut(seq_along(x), n, labels = FALSE))
+# }
+
+
 
 
 ## PURPOSE: Find and replace things that that will otherwise be ripped apart
@@ -523,6 +549,7 @@ prepare_corpus <- function(corpus,
                         preserve_references = TRUE) {
 
   message("------------PREPARING CORPUS------------------") 
+  #corpus <- str_to_lower(corpus)
   
   if (preserve_currency) {
     message("preserving currency references...")
@@ -536,7 +563,7 @@ prepare_corpus <- function(corpus,
 
   if (preserve_ngrams) {
     message("preserving ngrams...")
-    corpus <- future_imap_chr(corpus, preserve_ngrams_in_corpus)
+    corpus <- preserve_ngrams_in_corpus(corpus)
   }
 
   if (preserve_references) {
@@ -552,6 +579,28 @@ prepare_corpus <- function(corpus,
 
 }
 
+tokenize_line_words <- function(lines, sw) {
+  assert_that(is_character(lines))
+  
+  plan(multisession)
+  chr_vector <- future_map(lines, tokenize_words, 
+                               stopwords = sw, 
+                               strip_punct = TRUE, 
+                               strip_numeric = TRUE)
+  
+  return(invisible(chr_vector))
+}
+
+tokenize_line_word_stems <- function(lines, sw) {
+  assert_that(is_character(lines))
+  
+  plan(multisession)
+  chr_vector <- future_map(lines, tokenize_word_stems, 
+                               stopwords = sw)
+  
+  return(invisible(chr_vector))
+}
+
 ## PURPOSE: Tokenize the corpus into words or word stems.
 ## INPUT: a vector of cleaned, untokenized documents (i.e., an array of strings)
 ## OUTPUT: a vector of tokenized documents (i.e., an array of (stem) word arrays )
@@ -561,43 +610,38 @@ tokenize_corpus <- function(corpus,
                             stem_words = FALSE) {
   library(tokenizers)
   library(stopwords)
-
-  message("------------TOKENIZING CORPUS------------------") 
+  
+  message("------------TOKENIZING CORPUS------------------")
   
   plan(multisession)
   
   # assemble stopwords lists
   sw <- vector()
-
+  
   if (remove_stopwords) {
     sw <- c(sw, stopwords())
   }
-
+  
   if (remove_tax_stopwords) {
     sw <- c(sw, tax_stopwords)
   }
-
+  
   if (stem_words) {
     # tokens <- tokenize_word_stems(corpus, stopwords = sw)
-    tokens <- future_map(corpus,
-                             tokenize_word_stems,
-                             stopwords = sw)
+    tokens <- tokenize_line_word_stems(corpus, sw)
   } else {
     # tokens <- tokenize_words(corpus,
     #                          stopwords = sw,
     #                          strip_punct = TRUE,
     #                          strip_numeric = TRUE)
-    tokens <- future_map(corpus,
-                             tokenize_words,
-                             stopwords = sw,
-                             strip_punct = TRUE,
-                             strip_numeric = TRUE)
+    tokens <- tokenize_line_words(corpus, sw)
+    
   }
-
+  
   rettokens <- vector(mode = "list", length = length(tokens))
   for (i in 1:length(tokens)) {
     rettokens[[i]] <- unlist(tokens[[i]])
   }
-  
+
   return(invisible(rettokens))
 }

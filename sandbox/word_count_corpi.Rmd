@@ -1,0 +1,44 @@
+---
+title: "Token Count of Corpus"
+output: html_notebook
+---
+
+```{r}
+library(stringr)
+
+# IRC
+print("IRC token count:")
+sum(readRDS('/data/rstudio/rds/irc26.rds') %>% 
+  str_count(boundary("word")))
+
+# CFR
+print("CFR token count:")
+sum(readRDS('/data/rstudio/rds/ecfr26.rds') %>% 
+  str_count(boundary("word")))
+
+# IRS Bulletins
+print("IRS Bulletins token count:")
+sum(readRDS('/data/rstudio/rds/bulletins.rds') %>% 
+  str_count(boundary("word")))
+
+# IRS Instructions
+print("IRS Instructions token count:")
+sum(readRDS('/data/rstudio/rds/instructions.rds') %>% 
+  str_count(boundary("word")))
+
+# IRS Publicatons
+print("IRS Publications token count:")
+sum(readRDS('/data/rstudio/rds/publications.rds') %>% 
+  str_count(boundary("word")))
+
+# Court Listener
+print("Court Listener token count:")
+sum(readRDS('/data/rstudio/rds/courtlistener.rds') %>% 
+  str_count(boundary("word")))
+
+# IRS Bulletins
+print("Case Law token count:")
+sum(readRDS('/data/rstudio/rds/caselaw.rds') %>% 
+  str_count(boundary("word")))
+```
+

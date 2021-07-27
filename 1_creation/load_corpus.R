@@ -7,6 +7,7 @@ source("./data/corpora/irs_instructions.R")
 source("./data/corpora/irs_publications.R")
 
 library(fs)
+library(tibble)
 
 rds_dir <- "/data/rstudio/rds"
 

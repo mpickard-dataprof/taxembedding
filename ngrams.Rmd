@@ -1,0 +1,329 @@
+---
+title: "ngrams"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Stopwords
+While we won't remove stopwords when creating embeddings, but to find ngrams, it's better if we remove them.
+```{r}
+library(readr)
+
+tax_stopwords <- c(
+  "section",
+  "title",
+  "subsec",
+  "subsection",
+  "pub",
+  "provided",
+  str_c(1:6200),
+  "i",
+  "ii",
+  "iii",
+  "iiii",
+  "iv",
+  "xix",
+  "xi",
+  "note",
+  "act",
+  "amendment",
+  "amendments",
+  "date",
+  "par",
+  "paragraph",
+  "ch",
+  "chapter",
+  "stat",
+  "subpar",
+  "added",
+  "rule",
+  "code",
+  "i.r.c",
+  "effective",
+  "jan",
+  "preceding",
+  "sentence",
+  "regulations",
+  "regulation",
+  "prescribed",
+  "beginning",
+  "relating",
+  "related",
+  "provisions",
+  "amending",
+  "sections",
+  "similar",
+  "amended",
+  "amend",
+  "inserted",
+  "reference",
+  "references",
+  "subparagraph"
+)
+
+sw <- c(stopwords("en"), tax_stopwords)
+```
+
+# IRC
+```{r}
+library(fs)
+rds_dir <- "/data/rstudio/rds"
+irc26_path <- path(rds_dir, "irc26.rds")
+irc26 <- readRDS(irc26_path)
+
+irc26 <- prepare_corpus(irc26)
+
+toks <- tokens(irc26, remove_punct = TRUE, remove_symbols = TRUE)
+
+irc_ngrams <- toks %>%
+  tokens_remove(stopwords("en")) %>%
+  tokens_select(
+    pattern = "^[A-Z]",
+    valuetype = "regex",
+    case_insensitive = FALSE,
+    padding = TRUE
+  ) %>%
+  textstat_collocations(min_count = 10,
+                        tolower = TRUE,
+                        size = 3:6)
+
+write_csv(irc_ngrams, "/data/rstudio/ngram/irc_ngrams.csv")
+
+irc_ngrams %>% arrange(desc(length), desc(count))
+```
+
+
+# CFR
+```{r}
+library(fs)
+rds_dir <- "/data/rstudio/rds"
+cfr26_path <- path(rds_dir, "ecfr26.rds")
+cfr26 <- readRDS(cfr26_path)
+
+cfr26 <- prepare_corpus(cfr26)
+
+toks <- tokens(cfr26, remove_punct = TRUE, remove_symbols = TRUE)
+
+cfr_ngrams <- toks %>%
+  tokens_remove(sw) %>%
+  tokens_select(
+    pattern = "^[A-Z]",
+    valuetype = "regex",
+    case_insensitive = FALSE,
+    padding = TRUE
+  ) %>%
+  textstat_collocations(min_count = 10,
+                        tolower = TRUE,
+                        size = 3:6)
+
+write_csv(cfr_ngrams, "/data/rstudio/ngram/cfr_ngrams.csv")
+
+cfr_ngrams %>% arrange(desc(length), desc(count))
+```
+
+# IRB
+```{r}
+library(fs)
+rds_dir <- "/data/rstudio/rds"
+bulletin_path <- path(rds_dir, "bulletins.rds")
+bulletins <- readRDS(bulletin_path)
+
+bulletins <- prepare_corpus(bulletins)
+
+toks <- tokens(bulletins, remove_punct = TRUE, remove_symbols = TRUE)
+
+bulletin_ngrams <- toks %>%
+       tokens_remove(sw) %>%
+       textstat_collocations(min_count = 10, tolower = TRUE, size = 3:5)
+
+write_csv(bulletin_ngrams, "/data/rstudio/ngram/bulletin_ngrams.csv")
+
+```
+
+# IRI
+```{r}
+library(fs)
+rds_dir <- "/data/rstudio/rds"
+instructions_path <- path(rds_dir, "instructions.rds")
+instructions <- readRDS(instructions_path)
+
+instructions <- prepare_corpus(instructions)
+
+toks <- tokens(instructions, remove_punct = TRUE, remove_symbols = TRUE)
+
+instructions_ngrams <- toks %>%
+       tokens_remove(sw) %>%
+       textstat_collocations(min_count = 10, tolower = TRUE, size = 3:5)
+
+write_csv(instructions_ngrams, "/data/rstudio/ngram/instructions_ngrams.csv")
+```
+
+# IRP
+```{r}
+library(fs)
+rds_dir <- "/data/rstudio/rds"
+publications_path <- path(rds_dir, "publications.rds")
+publications <- readRDS(publications_path)
+
+publications <- prepare_corpus(publications)
+
+toks <- tokens(publications, remove_punct = TRUE, remove_symbols = TRUE)
+
+publications_ngrams <- toks %>%
+       tokens_remove(sw) %>%
+       textstat_collocations(min_count = 10, tolower = TRUE, size = 3:5)
+
+write_csv(publications_ngrams, "/data/rstudio/ngram/publications_ngrams.csv")
+```
+
+# Court Listener
+```{r}
+library(fs)
+rds_dir <- "/data/rstudio/rds"
+cl_path <- path(rds_dir, "courtlistener.rds")
+cl <- readRDS(cl_path)
+
+cl <- prepare_corpus(cl)
+
+toks <- tokens(cl, remove_punct = TRUE, remove_symbols = TRUE)
+
+cl_ngrams <- toks %>%
+       tokens_remove(sw) %>%
+       textstat_collocations(min_count = 10, tolower = TRUE, size = 3:5)
+
+write_csv(cl_ngrams, "/data/rstudio/ngram/cl_ngrams.csv")
+
+
+all_ngrams <- bind_rows(
+  irc_ngrams,
+  cfr_ngrams,
+  bulletin_ngrams,
+  instructions_ngrams,
+  publications_ngrams,
+  cl_ngrams
+)
+
+write_csv(all_ngrams, "/data/rstudio/ngram/all_ngrams.csv")
+
+```
+
+# Explore ngrams
+```{r}
+max(all_ngrams$count)
+
+all_ngrams %>% arrange(desc(length),desc(count))
+```
+
+# Sandbox
+```{r}
+library(quanteda)
+library("quanteda.textstats")
+library(tictoc)
+library(purrr)
+
+corpus <- readRDS("/data/rstudio/rds/corpus.rds")
+
+tic()
+toks <- tokens(corpus, remove_punct = TRUE, remove_symbols = TRUE)
+toc()
+
+saveRDS(toks, "/data/rstudio/ngram/tokens.rds", compress = FALSE)
+toks <- readRDS("/data/rstudio/ngram/tokens.rds")
+
+tok_chunks <- tokens_chunk(toks, size = 50000)
+
+df <- data.frame()
+
+toklist <- tok_chunks[1:5]
+
+for (i in 1:length(toklist)) {
+  df <- rbind(df,
+        data.frame(
+          toklist[i] %>%
+            tokens_remove(stopwords("en")) %>%
+            textstat_collocations(
+              min_count = 5,
+              tolower = TRUE,
+              size = 3:5
+            )
+        ))
+}
+ngrams_df <- map_dfr(tok_chunks[1], get_collocations)
+
+# tic()
+# ngrams <- toks %>%
+#         tokens_remove(stopwords("en")) %>%
+#         tokens_sample(size = 25000) %>%
+#         textstat_collocations(min_count = 5,
+#                               tolower = TRUE,
+#                               size = 3:5)
+# toc()
+#
+# saveRDS(gram2, "/data/rstudio/ngram/grams2.rds", compress = FALSE)
+#
+# tic()
+# gram3 <- toks %>%
+#        tokens_remove(stopwords("en")) %>%
+#        tokens_select(pattern = "^[A-Z]", valuetype = "regex",
+#                      case_insensitive = FALSE, padding = TRUE) %>%
+#        textstat_collocations(min_count = 5, tolower = TRUE, size = 3)
+# toc()
+#
+# saveRDS(gram3, "/data/rstudio/ngram/grams3.rds", compress = FALSE)
+#
+# tic()
+# gram4 <- toks %>%
+#        tokens_remove(stopwords("en")) %>%
+#        tokens_select(pattern = "^[A-Z]", valuetype = "regex",
+#                      case_insensitive = FALSE, padding = TRUE) %>%
+#        textstat_collocations(min_count = 5, tolower = TRUE, size = 4)
+# toc()
+#
+# saveRDS(gram4, "/data/rstudio/ngram/grams4.rds", compress = FALSE)
+#
+# tic()
+# gram5 <- toks %>%
+#        tokens_remove(stopwords("en")) %>%
+#        tokens_select(pattern = "^[A-Z]", valuetype = "regex",
+#                      case_insensitive = FALSE, padding = TRUE) %>%
+#        textstat_collocations(min_count = 5, tolower = TRUE, size = 5)
+# toc()
+#
+# saveRDS(gram5, "/data/rstudio/ngram/grams5.rds", compress = FALSE)
+#
+# ngrams <- toks %>%
+#        tokens_remove(stopwords("en")) %>%
+#        tokens_select(pattern = "^[A-Z]", valuetype = "regex",
+#                      case_insensitive = FALSE, padding = TRUE) %>%
+#        textstat_collocations(min_count = 5, tolower = TRUE, size = 3:5)
+```
+
+
+
+
+```{r}
+library(purrr)
+irc <- readRDS("/data/rstudio/rds/irc26.rds")
+
+ngram_patterns <- c("married individuals filing joint",
+                    "internal revenue",
+                    "internal revenue service",
+                    "retirement plan")
+
+ngram_pattern <- "married individuals filing joint|internal revenue|internal revenue service|retirement plan"
+
+tic()
+single <- irc %>% str_to_lower() %>% str_replace_all(ngram_pattern,join_ngram)
+toc()
+
+tic()
+for (pattern in ngram_patterns) {
+  multiple <- irc %>% str_to_lower() %>% str_replace_all(pattern, join_ngram)
+}
+toc()
+
+```
+

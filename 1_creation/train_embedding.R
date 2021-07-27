@@ -28,23 +28,37 @@ generateEmbeddings <- function() {
     dir_create(EMBED_PATH)
   }
 
+  ## NOTE [7/7/2021]: Based on initial analysis and knowledge of embeddings,
+  ## I finalized the corpus parameters as follows.
+  
   ## Corpus hyperparameters here
-  remove_stopwords <- c(TRUE, FALSE)
-  preserve_code_references <- c(TRUE, FALSE)
-  preserve_ngrams <- c(TRUE, FALSE)
+  remove_stopwords <- c(FALSE)
+  # remove_stopwords <- c(TRUE, FALSE)
+  preserve_code_references <- c(TRUE)
+  # preserve_code_references <- c(TRUE, FALSE)
+  preserve_ngrams <- c(TRUE)
+  # preserve_ngrams <- c(TRUE, FALSE)
 
+  ## NOTE [7/7/2021]: Based on initial analysis and knowledge of embeddings,
+  ## I finalized the training parameters as follows.
+  
   ## embedding hyperparameters here
-  type <- c("word2vec", "fasttext")
-  dimensions <- c(64L, 128L, 256L)
+  type <- c("word2vec") # more interested in semantics than syntactics
+  # type <- c("word2vec", "fasttext")
+  dimensions <- c(128L) # 128 and 256 were comparable, go with cheaper 128
+  # dimensions <- c(64L, 128L, 256L)
   # dimensions <- c(32L, 128L, 256L, 512L)
   # dimensions <- c(32L, 64L, 96L, 128L, 192L, 256L, 512L)
-  window <- c(8L, 20L)
+  window <- c(8L)
+  # window <- c(8L, 20L)
   # window <- c(2L, 4L, 8L)
   # window <- c(2L, 4L, 5L, 8L, 10L)
-  min_word_occur <- c(5L, 10L, 20L, 50L)
+  min_word_occur <- c(20L)
+  # min_word_occur <- c(5L, 10L, 20L, 50L)
   # min_word_occur <- c(5L, 20L, 50L)
   # min_word_occur <- c(3L, 5L, 10L, 20L, 50L)
-  epochs = c(5L, 20L)
+  epochs = c(5L)
+  # epochs = c(5L, 20L)
 
   corpus_param_df <- expand_grid(remove_stopwords, preserve_code_references, preserve_ngrams)
 
