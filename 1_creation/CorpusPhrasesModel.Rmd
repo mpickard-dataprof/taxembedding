@@ -9,30 +9,35 @@ output: pdf_document
 library(reticulate)
 library(stringr)
 library(tokenizers)
+reticulate::use_condaenv("r-reticulate")
 ```
 
 ```{r, warning = FALSE, message = FALSE}
 # load the IRC corpus and process it if necessary
-IRCpath <- "/home/alex/Projects/taxembed/data/corpora/rda/irc26.rda"
-load(IRCpath)
-source("/home/alex/Projects/taxembed/1_creation/process_corpus.R")
-irc26 <- prepare_corpus(irc26)
-irc26 <- tokenize_corpus(irc26, remove_stopwords = TRUE, remove_tax_stopwords = TRUE)
-r_to_py(irc26)
-temp <- t[1:50000]
-r_to_py(temp)
+# IRCpath <- "/home/alex/Projects/taxembed/data/corpora/rda/irc26.rda"
+IRCpath <- "/data/rstudio/corpi/sw_refs_nongrams/irc.rds"
+irc <- readRDS(IRCpath)
+source("../1_creation/process_corpus.R")
+irc <- prepare_corpus(irc)
+irc <- tokenize_corpus(irc, remove_stopwords = TRUE, remove_tax_stopwords = TRUE)
+r_to_py(irc)
+# temp <- t[1:50000]
+# r_to_py(temp)
 ```
 
 
 ```{python}
 # train the phrases model
-from gensim.models.phrases import Phrases, Phraser
+# import pkg_resources
+# pkg_resources.require("gensim==4.0.1")
+from gensim.models.phrases import Phrases, Phraser, ENGLISH_CONNECTOR_WORDS
 
 # train the bigram and trigram
-bigram = Phrases(r.temp, threshold = 8)
-trigram = Phrases(bigram_irc[r.temp], threshold = 8)
-fourgram = Phrases(trigram_irc[bigram_irc[r.temp]], threshold = 8)
-fivegram = Phrases(fourgram_irc[trigram_irc[bigram_irc[r.temp]]], threshold = 8)
+bigram = Phrases(r.irc, threshold = 8, connector_words=ENGLISH_CONNECTOR_WORDS)
+trigram = Phrases(bigram[r.irc], threshold = 8, connector_words=ENGLISH_CONNECTOR_WORDS)
+fourgram = Phrases(trigram[bigram[r.irc]], threshold = 8, connector_words=ENGLISH_CONNECTOR_WORDS)
+fivegram = Phrases(fourgram[trigram[bigram[r.irc]]], threshold = 8, connector_words=ENGLISH_CONNECTOR_WORDS)
+
 
 # save the bigram and the trigram
 bigram.save("bigram_irc.pkl")
@@ -43,45 +48,71 @@ fivegram.save("fivegram_irc.pkl")
 
 ```{python}
 # create example terms
-test_grams = [["internal", "revenue"],
-              ["internal", "revenue", "service"],
-              ["higher", "tax"],
-              ["higher", "tax", "rates"],
-              ["intellectual", "property"],
-              ["intellectual", "property", "rights"],
-              ["long-term", "capital", "gain"],
-              ["long-term", "capital", "gain", "rate"],
-              ["temporary", "assistance"],
-              ["temporary", "assistance", "for", "needy", "families"]]
-              
-all_test_grams = ["internal", "revenue",
-                  "internal", "revenue", "service",
-                  "higher", "tax",
-                  "higher", "tax", "rates",
-                  "intellectual", "property",
-                  "intellectual", "property", "rights",
-                  "long-term", "capital", "gain",
-                  "long-term", "capital", "gain", "rate",
-                  "temporary", "assistance",
-                  "temporary", "assistance", "for", "needy", "families", "tax", "deduction",
-                  "volunteer", "income", "tax", "assistance",
-                  "coverdell", "education", "savings", "account", "child", "tax", "credit", "tax", "credit", "tax", "deductible"]
-              
+# test_grams = [["internal", "revenue"],
+#               ["internal", "revenue", "service"],
+#               ["higher", "tax"],
+#               ["higher", "tax", "rates"],
+#               ["intellectual", "property"],
+#               ["intellectual", "property", "rights"],
+#               ["long-term", "capital", "gain"],
+#               ["long-term", "capital", "gain", "rate"],
+#               ["temporary", "assistance"],
+#               ["temporary", "assistance", "for", "needy", "families"]]
+#               
+# all_test_grams = ["internal", "revenue",
+#                   "internal", "revenue", "service",
+#                   "higher", "tax",
+#                   "higher", "tax", "rates",
+#                   "intellectual", "property",
+#                   "intellectual", "property", "rights",
+#                   "long-term", "capital", "gain",
+#                   "long-term", "capital", "gain", "rate",
+#                   "temporary", "assistance",
+#                   "temporary", "assistance", "for", "needy", "families", "tax", "deduction",
+#                   "volunteer", "income", "tax", "assistance",
+#                   "coverdell", "education", "savings", "account", "child", "tax", "credit", "tax", "credit", "tax", "deductible"]
+#               
+# 
+# for ngram in r.irc:
+#   # print(bigram_irc[ngram])
+#   print(fivegram[fourgram[trigram[bigram[ngram]]]])
+#   print()
+# 
+# print(fivegram[fourgram[trigram[bigram[all_test_grams]]]])
 
-for ngram in r.temp:
-  # print(bigram_irc[ngram])
-  print(fivegram_irc[fourgram_irc[trigram_irc[bigram_irc[ngram]]]])
-  print()
+ngram_irc = fivegram[fourgram[trigram[bigram[r.irc]]]]
 
-print(fivegram_irc[fourgram_irc[trigram_irc[bigram_irc[all_test_grams]]]])
+irc_ngrams = [ngram for ngram in ngram_irc]
+
 ```
 
 ```{python}
 # load model names
-bigram_irc = Phrases.load("/home/alex/Projects/taxembed/1_creation/bigram_irc.pkl")
-trigram_irc = Phrases.load("/home/alex/Projects/taxembed/1_creation/trigram_irc.pkl")
-fourgram_irc = Phrases.load("/home/alex/Projects/taxembed/1_creation/fourgram_irc.pkl")
-fivegram_irc = Phrases.load("/home/alex/Projects/taxembed/1_creation/fivegram_irc.pkl")
+bigram_irc = Phrases.load("bigram_irc.pkl")
+trigram_irc = Phrases.load("trigram_irc.pkl")
+fourgram_irc = Phrases.load("fourgram_irc.pkl")
+fivegram_irc = Phrases.load("fivegram_irc.pkl")
 ```
+
+
+```{r}
+library(tidyverse)
+irc_ngrams <- py$irc_ngrams
+
+count_words <- function(ngram) {
+  words <- str_split(ngram, "_") %>% unlist()
+  return(length(words))
+}
+
+ngrams <- unlist(irc_ngrams)
+sizes <- map(ngrams, count_words) %>% unlist()
+ngrams_df <- tibble(ngram = ngrams, size = sizes) %>% 
+  group_by(ngram, size) %>% 
+  count()
+
+ngrams_df %>% filter(size > 4) %>% arrange(desc(n))
+```
+# Conclusions
+After running gensim phraser (up to 6-grams), there is still a lot of noise.
 
 

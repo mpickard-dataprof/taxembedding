@@ -1,0 +1,25 @@
+---
+title: "Convert RDS to TXT"
+output: html_notebook
+---
+# Convert full corpus
+```{r}
+library(readr)
+corpus <- readRDS("/data/rstudio/corpi/sw_refs_nongrams/full_corpus.rds")
+write_lines(corpus, "/data/rstudio/corpi/sw_refs_nongrams/full_corpus.txt", sep = " ")
+```
+
+# Convert IRC - for testing
+```{r}
+library(readr)
+irc <- readRDS("/data/rstudio/corpi/sw_refs_nongrams/irc.rds")
+write_lines(irc, "/data/rstudio/corpi/sw_refs_nongrams/irc.txt", sep = " ")
+```
+
+# Combine IRC and CFR
+```{r}
+library(readr)
+irc <- readRDS("/data/rstudio/corpi/sw_refs_nongrams/irc.rds")
+cfr <- readRDS("/data/rstudio/corpi/sw_refs_nongrams/ecfr.rds")
+write_lines(c(irc,cfr), "/data/rstudio/corpi/sw_refs_nongrams/irc_cfr.txt", sep = " ")
+```

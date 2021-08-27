@@ -20,9 +20,9 @@
 #          | behavior of the script                                          #
 #          |                                                                 #
 ##############################################################################
-RDS_FILE_LOCATION <- "~/Projects/taxembed/data/corpora/rda_processed/matt_processed/sw-t_refs-t_ngrams-t"
-INPUT_FILE_PATH <- "/home/alex/Projects/taxembed/data/input/untallied/analogies/analogies-ngrams"
-OUTPUT_FILE_PATH <- "~/Projects/taxembed/data/output/tallied/analogies/analogies-ngrams"
+RDS_FILE_LOCATION <- "/data/rstudio/corpi"
+INPUT_FILE_PATH <- "~/Projects/taxembed/2_validation/ngrams_master.csv"
+OUTPUT_FILE_PATH <- "~/Projects/taxembed/2_valdiation"
 ANALOGY_SWITCH <- TRUE
 INCLUDE_COUNTS <- FALSE
 CSV_SWITCH <- FALSE

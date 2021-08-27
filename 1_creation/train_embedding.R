@@ -1,4 +1,4 @@
-source("1_creation/R/process_corpus.R")
+source("1_creation/process_corpus.R")
 
 
 library(dplyr)
@@ -8,8 +8,8 @@ library(purrr)
 library(tidyr)
 
 ## PATHS FOR OUTPUTS
-EMBED_PATH = '/data/rstudio/embeddings'
-CORPI_PATH = '/data/rstudio/corpi'
+EMBED_PATH = '/data/rstudio/embeddings/sw_refs_ngrams'
+CORPI_PATH = '/data/rstudio/corpi/sw_refs_ngrams'
 
 generateEmbeddings <- function() {
 
@@ -20,6 +20,7 @@ generateEmbeddings <- function() {
   ## if not, create them
   if (!dir_exists(CORPI_PATH)) {
     cat("'corpi' directory does not exist. Creating it...\n")
+    message(str_glue("---Preparing corpus---"))
     dir_create(CORPI_PATH)
   }
 
@@ -31,35 +32,56 @@ generateEmbeddings <- function() {
   ## NOTE [7/7/2021]: Based on initial analysis and knowledge of embeddings,
   ## I finalized the corpus parameters as follows.
   
-  ## Corpus hyperparameters here
-  remove_stopwords <- c(FALSE)
-  # remove_stopwords <- c(TRUE, FALSE)
-  preserve_code_references <- c(TRUE)
-  # preserve_code_references <- c(TRUE, FALSE)
-  preserve_ngrams <- c(TRUE)
-  # preserve_ngrams <- c(TRUE, FALSE)
-
+  #####################################################################
+  ################# Iteration #1 hyperparameters ######################
+  #####################################################################
+  
   ## NOTE [7/7/2021]: Based on initial analysis and knowledge of embeddings,
-  ## I finalized the training parameters as follows.
+  ## I finalized the training parameters as follows. I selected these based on initial analysis of embedding results (see
+  ## top 100 embedding analysis, and statistical comparison of similarity and 
+  ## analogy tests).
+  
+  ## corpus parameters ##
+  remove_stopwords <- c(FALSE) # swords important to some ngrams
+  preserve_code_references <- c(TRUE) # these have meanings
+  preserve_ngrams <- c(TRUE) # have meanings
+  
+  ## embedding parameters ##
+  type <- c("word2vec", "fasttext") # more interested in semantics than syntactics
+  dimensions <- c(128L) # 128 and 256 were comparable, go with cheaper 128
+  window <- c(8L)
+  min_word_occur <- c(20L)
+  
+  
+  #### Old parameters
+  
+  ## Corpus hyperparameters here
+  # remove_stopwords <- c(FALSE)
+  # # remove_stopwords <- c(TRUE, FALSE)
+  # preserve_code_references <- c(TRUE)
+  # # preserve_code_references <- c(TRUE, FALSE)
+  # preserve_ngrams <- c(TRUE)
+  # # preserve_ngrams <- c(TRUE, FALSE)
+
   
   ## embedding hyperparameters here
-  type <- c("word2vec") # more interested in semantics than syntactics
-  # type <- c("word2vec", "fasttext")
-  dimensions <- c(128L) # 128 and 256 were comparable, go with cheaper 128
-  # dimensions <- c(64L, 128L, 256L)
-  # dimensions <- c(32L, 128L, 256L, 512L)
-  # dimensions <- c(32L, 64L, 96L, 128L, 192L, 256L, 512L)
-  window <- c(8L)
-  # window <- c(8L, 20L)
-  # window <- c(2L, 4L, 8L)
-  # window <- c(2L, 4L, 5L, 8L, 10L)
-  min_word_occur <- c(20L)
-  # min_word_occur <- c(5L, 10L, 20L, 50L)
-  # min_word_occur <- c(5L, 20L, 50L)
-  # min_word_occur <- c(3L, 5L, 10L, 20L, 50L)
-  epochs = c(5L)
-  # epochs = c(5L, 20L)
-
+  # type <- c("word2vec") # more interested in semantics than syntactics
+  # # type <- c("word2vec", "fasttext")
+  # dimensions <- c(128L) # 128 and 256 were comparable, go with cheaper 128
+  # # dimensions <- c(64L, 128L, 256L)
+  # # dimensions <- c(32L, 128L, 256L, 512L)
+  # # dimensions <- c(32L, 64L, 96L, 128L, 192L, 256L, 512L)
+  # window <- c(8L)
+  # # window <- c(8L, 20L)
+  # # window <- c(2L, 4L, 8L)
+  # # window <- c(2L, 4L, 5L, 8L, 10L)
+  # min_word_occur <- c(20L)
+  # # min_word_occur <- c(5L, 10L, 20L, 50L)
+  # # min_word_occur <- c(5L, 20L, 50L)
+  # # min_word_occur <- c(3L, 5L, 10L, 20L, 50L)
+  # epochs = c(5L)
+  # # epochs = c(5L, 20L)
+  # 
   corpus_param_df <- expand_grid(remove_stopwords, preserve_code_references, preserve_ngrams)
 
 
@@ -99,7 +121,8 @@ generate_corpus <- function(remove_stopwords, preserve_code_references, preserve
   
   filename <-  paste0("sw-", str_sub(tolower(!remove_stopwords), 1, 1),
                       "_refs-", str_sub(tolower(preserve_code_references), 1, 1),
-                      "_ngrams-", str_sub(tolower(preserve_ngrams), 1, 1))
+                      "_ngrams-", str_sub(tolower(preserve_ngrams), 1, 1),
+                      ".rds")
 
   corpus_path <- file.path(CORPI_PATH, filename)
 
@@ -111,18 +134,21 @@ generate_corpus <- function(remove_stopwords, preserve_code_references, preserve
 
   } else {
 
-    cat(corpus_path, ": Creating corpus...\n")
     ## load the raw corpus from disk
     corpus <- load_corpus()
 
     ## accepting defaults to preserve currency and percent phrases and not preserve ngrams
+    message(str_glue("---Preparing corpus---"))
     corpus <-
       prepare_corpus(corpus, preserve_references = preserve_code_references, preserve_ngrams = preserve_ngrams)
 
     ## accepting defaults to not stem words
+    message(str_glue("---Tokenizing corpus---"))
     corpus <-
       tokenize_corpus(corpus, remove_stopwords = remove_stopwords)
 
+    
+    message(str_glue("--- Saving {corpus_path}..."))
     saveRDS(corpus, corpus_path, compress = FALSE)
   }
 

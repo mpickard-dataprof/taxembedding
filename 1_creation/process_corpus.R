@@ -1,3 +1,6 @@
+source("1_creation/load_corpus.R")
+
+
 ##############################################################
 ##############################################################
 
@@ -490,7 +493,7 @@ preserve_ngrams_in_corpus <- function(lines) {
   
   # load list ngrams to preserve
   if (!exists("tax_ngrams")) {
-    tax_ngrams <- read_csv("ngrams.csv")
+    tax_ngrams <- read_csv("ngrams_final.csv")
   }
 
   tax_ngrams <- tax_ngrams %>% 
@@ -605,7 +608,7 @@ tokenize_line_word_stems <- function(lines, sw) {
 ## INPUT: a vector of cleaned, untokenized documents (i.e., an array of strings)
 ## OUTPUT: a vector of tokenized documents (i.e., an array of (stem) word arrays )
 tokenize_corpus <- function(corpus,
-                            remove_stopwords = TRUE,
+                            remove_stopwords = FALSE,
                             remove_tax_stopwords = TRUE,
                             stem_words = FALSE) {
   library(tokenizers)
