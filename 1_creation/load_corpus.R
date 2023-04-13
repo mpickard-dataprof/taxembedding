@@ -8,6 +8,7 @@ source("./data/corpora/irs_publications.R")
 
 library(fs)
 library(tibble)
+library(arrow)
 
 rds_dir <- "/data/rstudio/rds"
 
@@ -16,15 +17,17 @@ load_corpus <- function() {
   # first check if the corpus has already been prepared
   # If so, load it and return it
   rds_dir <- "/data/rstudio/rds"
-  rds_path <- path(rds_dir, "corpus.rds")
+  # rds_path <- path(rds_dir, "corpus.rds")
+  pq_path <- path(rds_dir, "corpus.pq")
   
   if(exists("corpus")) {
     return(invisible(corpus))
   }
   
-  if(file_exists(rds_path)) {
-    message(str_glue("'{rds_path}' exists on disk. Loading and returning."))
-    corpus <- readRDS(rds_path)
+  if(file_exists(pq_path)) {
+    message(str_glue("'{pq_path}' exists on disk. Loading and returning."))
+    # corpus <- readRDS(pq_path)
+    corpus <- read_parquet(pq_path) %>% pull(lines)
     return(invisible(corpus))
   }
   
@@ -110,14 +113,14 @@ load_corpus <- function() {
   
   if(file_exists(publications_path)) {
     tryCatch(
-      publications <- readRDS(publications_path),
+      pubs <- readRDS(publications_path),
       error = function(cond) {
         message(str_glue("'{publications_path}' exists, but there was an error loading it."))
       }
     )
   } else {
     message(str_glue("'{publications_path'} does not seem to exist. Attempting to download and prepare it..."))
-    publications <- extract_publications()
+    pubs <- extract_publications()
   }
   
   ### Load IRS Instructions ###
@@ -145,7 +148,8 @@ load_corpus <- function() {
     instructions
   )
   
-  saveRDS(corpus, rds_path, compress = FALSE)
+  write_parquet(tibble(lines = corpus), pq_path)
+  # saveRDS(corpus, rds_path, compress = FALSE)
   
   return(invisible(corpus))
 }

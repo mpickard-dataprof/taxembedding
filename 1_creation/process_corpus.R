@@ -102,6 +102,13 @@ replace_currency <- function(line) {
   # separate thousands, millions, etc.
   decimal_in_currency <- "(?<=\\$(\\d{1,3}(\\_\\d{3}){0,4})?)(\\.)(?=\\d{1,2})"
   
+  # replace $ (at front) with USD (at end), for example: 
+  # $3_500 --> 3_500_usd
+  # $3_million --> 3_million_usd
+  # $56_750_25 --> 56_750_25_usd
+  dollarsign_to_usd <-  "\\$([[:alnum:]_]+)"
+  
+   
   text <- character(1)
   attempt <- 0
   
@@ -111,7 +118,8 @@ replace_currency <- function(line) {
       text <- line %>%
         str_replace_all(alpha_num_currency, "_") %>%
         str_replace_all(comma_in_currency, "_") %>%
-        str_replace_all(decimal_in_currency, "_")
+        str_replace_all(decimal_in_currency, "_") %>% 
+        str_replace_all(dollarsign_to_usd, "\\1_usd")
     }, silent = TRUE)
     
     if(!stri_isempty(text)) {
@@ -432,29 +440,31 @@ replace_references <- function(line) {
   
 }
 
-replace_references_in_corpus <- function(lines) {
-  assert_that(is_character(lines))
-  
-  plan(multisession)
-  chr_vector <- future_map_chr(lines, replace_references)
-  
-  return(invisible(chr_vector))
-}
-
-# helper function for str_replace_all call in preserve_ngrams_in_corpus.
-# It replaces spaces with underscores inside the match
-join_ngram <- function(line) {
-  return (
-    line %>% str_replace_all("[:blank:]", "_")
-  )
-}
-
-replace_ngrams <- function(line, pattern) {
+####
+# 36% --> 36_percent
+# 34.5% --> 34_5_percent
+# 15.5-percent --> 15_5_percent
+replace_percent <- function(line) {
   
   assert_that(is_character(line), length(line) == 1)
   
   if(stri_isempty(line)) return(character(1))
   
+  ## line <- "34.5% 15.5-percent 45.75 percent 2.75-percent 15-percent \aI02Over $70,000 but not over $125,000 \aD\aoi2$17,964.25, plus 36% of the excess over $70,000. 34.5 percent. 55 percentage"
+
+  # Examples from USC26 include:
+  # 39.6 percent
+  # 15-percent
+  # 36 percent
+  # 3 percent
+  # 200 percent
+
+  ## NOTE: I found one case of "thirty-five percent", but figure such cases will be either 1)
+  ## immaterial or 2) will handled by n-gram windows.
+  decimal_percent <- "(?<=(\\d{0,3}))(\\.)(?=(\\d{1,2}%|\\d{0,2}[ -]percent))"
+  # TODO: Fix alpha_num_percent pattern to not match "7th such taxable year, 1/3 of the percentage"
+  alpha_num_percent <- "(?<=(\\d{0,3})(\\_\\d{1,2})?)([ -])(?=percent)"
+
   text <- character(1)
   attempt <- 0
   
@@ -462,9 +472,9 @@ replace_ngrams <- function(line, pattern) {
     attempt <- attempt + 1
     try({
       text <- line %>%
-        # replace the ngrams
-        # Place code here to replace ngram in a single line
-        str_replace_all(pattern, join_ngram)
+        str_replace_all(decimal_percent, "_") %>%
+        str_replace_all(alpha_num_percent, "_") %>%
+        str_replace_all("%", "_percent")
     }, silent = TRUE)
     
     if(!stri_isempty(text)) {
@@ -478,6 +488,35 @@ replace_ngrams <- function(line, pattern) {
   line_head <- str_sub(line, 1, 100)
   message(str_glue("'{match.call()[[1]]}()': reached max attempts. returning empty string. Line = {line_head}\n"))
   return(invisible(character(1)))
+}
+
+replace_percent_in_corpus <- function(lines) {
+  assert_that(is_character(lines))
+  
+  plan(multisession)
+  chr_vector <- future_map_chr(lines, replace_percent)
+  
+  return(invisible(chr_vector))
+}
+
+replace_references_in_corpus<- function(lines) {
+  assert_that(is_character(lines))
+  
+  plan(multisession)
+  chr_vector <- future_map_chr(lines, replace_references)
+  
+  return(invisible(chr_vector))
+}
+  
+replace_ngrams <- function(line, ngram_named_list) {
+  
+  assert_that(is_character(line), length(line) == 1)
+  
+  if(stri_isempty(line)) return(character(1))
+  
+  line <- str_replace_all(line, pattern = ngram_named_list)
+  
+  return(invisible(line))
   
 }
 
@@ -492,31 +531,32 @@ preserve_ngrams_in_corpus <- function(lines) {
   assert_that(is_character(lines))
   
   # load list ngrams to preserve
-  if (!exists("tax_ngrams")) {
-    tax_ngrams <- read_csv("ngrams_final.csv")
-  }
+  tax_ngrams <- read_csv("ngrams_final_unique.csv")
 
   tax_ngrams <- tax_ngrams %>% 
-    mutate(size = ngram %>% str_count(boundary("word")))
+    mutate(ngram = str_to_lower(ngram)) %>% 
+    mutate(size = ngram %>% str_count(boundary("word"))) %>% 
+    filter(size > 1) %>% 
+    filter(size < 7) %>% 
+    arrange(desc(size)) %>% 
+    pull(ngram)
   
-  tax_ngrams <- tax_ngrams %>% filter(size > 1)
+  values <- tax_ngrams %>% 
+    # pull(ngram) %>% 
+    str_replace_all("[\\-\\(\\)\\/ ]", "_")
+  # keys <- tax_ngrams %>% pull(ngram)
+  keys <- tax_ngrams
+  names(values) <- keys
   
-  # assemble the regex pattern--largest ngrams first
-  # the ngrams were generated empirically with other code, basically
-  # selected ngrams that occur most frequently.
-  
-  if (!exists("ngram_patterns")) {
-    sizes <- rev(unique(tax_ngrams$size))
-    ngram_patterns <-
-      map_chr(sizes, create_ngram_regex, df = tax_ngrams)
-    ngram_patterns <- str_c(ngram_patterns, collapse = "|")
-  }
-
   plan(multisession)
-  chr_vector <- future_map_chr(lines, replace_ngrams, pattern = ngram_patterns)
+  # plan(sequential)
+  chr_vector <- future_map_chr(lines, 
+                               replace_ngrams, 
+                               ngram_named_list = values)
   
   return(invisible(chr_vector))
 }
+
 
 # helper function to paste each ngram size together
 create_ngram_regex <- function(df, ngram_size) {
@@ -589,7 +629,7 @@ tokenize_line_words <- function(lines, sw) {
   chr_vector <- future_map(lines, tokenize_words, 
                                stopwords = sw, 
                                strip_punct = TRUE, 
-                               strip_numeric = TRUE)
+                               strip_numeric = FALSE)
   
   return(invisible(chr_vector))
 }
