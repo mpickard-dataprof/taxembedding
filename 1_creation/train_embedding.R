@@ -1,27 +1,29 @@
-source("1_creation/process_corpus.R")
-
-
+Sys.setenv(RETICULATE_PYTHON='/etc/anaconda/envs/embed_creation/bin/python')
+library(reticulate)
 library(dplyr)
 library(fs)
 library(readr)
 library(purrr)
 library(tidyr)
 
+source("1_creation/process_corpus.R")
+
 ## PATHS FOR OUTPUTS
 EMBED_PATH = '/data/rstudio/embeddings/sw_refs_ngrams'
-CORPI_PATH = '/data/rstudio/corpi/sw_refs_ngrams'
+PREP_CORPI_PATH = '/data/rstudio/corpi/prepared/sw_refs_ngrams'
+TOK_CORPI_PATH = '/data/rstudio/corpi/tokenized/sw_refs_ngrams'
 
 generateEmbeddings <- function() {
 
   # num_cores <- availableCores() / 2
-  num_cores <- 12
+  num_cores <- 12L
 
   ## check if 'corpi' and 'embeddings' directories exists
   ## if not, create them
-  if (!dir_exists(CORPI_PATH)) {
+  if (!dir_exists(PREP_CORPI_PATH)) {
     cat("'corpi' directory does not exist. Creating it...\n")
     message(str_glue("---Preparing corpus---"))
-    dir_create(CORPI_PATH)
+    dir_create(PREP_CORPI_PATH)
   }
 
   if (!dir_exists(EMBED_PATH)) {
@@ -51,6 +53,7 @@ generateEmbeddings <- function() {
   dimensions <- c(128L) # 128 and 256 were comparable, go with cheaper 128
   window <- c(8L)
   min_word_occur <- c(20L)
+  epochs <- c(5L)
   
   
   #### Old parameters
@@ -114,56 +117,77 @@ generateEmbeddings <- function() {
 
 ## this function generates different versions of the corpus based on
 ## whether the user wants stopwords removed, preserve irc refs, etc.
-generate_corpus <- function(remove_stopwords, preserve_code_references, preserve_ngrams) {
-
-  ## IMPORTANT: I made the process_corpus function multisession, so multisession
-  ## programming should not be used here when generating the corpus.
-  
-  filename <-  paste0("sw-", str_sub(tolower(!remove_stopwords), 1, 1),
-                      "_refs-", str_sub(tolower(preserve_code_references), 1, 1),
-                      "_ngrams-", str_sub(tolower(preserve_ngrams), 1, 1),
-                      ".rds")
-
-  corpus_path <- file.path(CORPI_PATH, filename)
-
-  cat("Generating corpus '", filename, "'...\n")
-
-  if (file_exists(corpus_path)) {
-
-    cat("Corpus already exists on disk.\n")
-
-  } else {
-
-    ## load the raw corpus from disk
-    corpus <- load_corpus()
-
-    ## accepting defaults to preserve currency and percent phrases and not preserve ngrams
-    message(str_glue("---Preparing corpus---"))
-    corpus <-
-      prepare_corpus(corpus, preserve_references = preserve_code_references, preserve_ngrams = preserve_ngrams)
-
-    ## accepting defaults to not stem words
+generate_corpus <-
+  function(remove_stopwords,
+           preserve_code_references,
+           preserve_ngrams) {
+    ## IMPORTANT: I made the process_corpus function multisession, so multisession
+    ## programming should not be used here when generating the corpus.
+    
+    filename <-
+      paste0(
+        "sw-",
+        str_sub(tolower(!remove_stopwords), 1, 1),
+        "_refs-",
+        str_sub(tolower(preserve_code_references), 1, 1),
+        "_ngrams-",
+        str_sub(tolower(preserve_ngrams), 1, 1),
+        ".pq"
+      )
+    # ".rds")
+    
+    prep_corpus_path <- file.path(PREP_CORPI_PATH, filename)
+    
+    cat("Generating corpus '", filename, "'...\n")
+    
+    if (file_exists(prep_corpus_path)) {
+      # if the prepared corpus already exists on disk, load it
+      cat("Corpus already exists on disk. Loading it...\n")
+      corpus <- read_parquet(prep_corpus_path)
+      
+    } else {
+      # if the prepare corpus does NOT exist on disk, load the raw corpus,
+      # process it, and save it as a .pq file.
+      corpus <- load_corpus()
+      
+      ## accepting defaults to preserve currency and percent phrases and not preserve ngrams
+      message(str_glue("---Preparing corpus---"))
+      corpus <-
+        prepare_corpus(corpus,
+                       preserve_references = preserve_code_references,
+                       preserve_ngrams = preserve_ngrams)
+      
+      
+      message(str_glue("Saving temp prepared corpus..."))
+      # saveRDS(corpus, file.path("/data/rstudio/corpi/prepared/sw_refs_ngrams", filename), compress = FALSE)
+      write_parquet(tibble(lines = corpus),
+                    file.path(PREP_CORPI_PATH, filename))
+    }
+    
+    tok_corpus_path <- file.path(PREP_CORPI_PATH, filename)
+    if (file_exists(corpus_path)) {
+    
+    # accepting defaults to not stem words
     message(str_glue("---Tokenizing corpus---"))
     corpus <-
       tokenize_corpus(corpus, remove_stopwords = remove_stopwords)
-
     
-    message(str_glue("--- Saving {corpus_path}..."))
-    saveRDS(corpus, corpus_path, compress = FALSE)
+    
+    message(str_glue("--- Saving {corpus_path}...", TOK_CORPI_PATH))
+    write_parquet(tibble(lines = corpus), file.path(TOK_CORPI_PATH, filename))
+    
+    # invisible(corpus)
+    
+    ## use this code if want to return a tibble with all parameters
+    ## right now just writing corpi to disk so don't have to repeatedly
+    ## generate the same corpus for different embedding options
+    tibble(
+      corpuspath = corpus_path,
+      stopwords = !remove_stopwords,
+      code_refs = preserve_code_references,
+      preserve_ngrams = preserve_ngrams
+    )
   }
-
-  # invisible(corpus)
-
-  ## use this code if want to return a tibble with all parameters
-  ## right now just writing corpi to disk so don't have to repeatedly
-  ## generate the same corpus for different embedding options
-  tibble(
-    corpuspath = corpus_path,
-    stopwords = !remove_stopwords,
-    code_refs = preserve_code_references,
-    preserve_ngrams = preserve_ngrams
-  )
-}
 
 
 
@@ -178,8 +202,6 @@ train_gensim_wv <- function(corpuspath,
                             window = 3L,
                             min_word_occur = 5L,
                             epochs = 5L) {
-  library(reticulate)
-  library(dplyr)
 
   embed_name <- paste(
     if_else(stopwords, "sw", "nosw"),
@@ -222,50 +244,21 @@ train_gensim_wv <- function(corpuspath,
   if (!file_exists(corpuspath)) {
     cat("Corpus (", corpuspath, ") not found.\n")
   } else {
-    cat("Loading ", corpuspath, "...\n")
-    corpus <- readRDS(corpuspath)
+    if (exists("corpus")) {
+      cat("Corpus is already loaded...\n")
+    }
+    else {
+      cat("Loading ", corpuspath, "...\n")
+      # corpus <- readRDS(corpuspath)
+      corpus <- read_parquet(corpuspath)
+    }
   }
-
+  
   tryCatch({
-    cat("Creating ", embed_name, " embedding...\n")
-
-    # PYTHON = from gensim import word2vec, fasttext
-    gensim <- import("gensim")
-
-    type <- match.arg(type, c("fasttext", "word2vec"))
-
-    if (type == "word2vec") {
-      # create Word2Vec using Python call to gensim's word2vec implementation
-      model <- gensim$models$word2vec$Word2Vec(
-        size = dimensions,
-        window = window,
-        min_count = min_word_occur,
-        workers = numCores
-      )
-    }
-
-    if (type == "fasttext") {
-      # create Fasttext using Python call to gensim's word2vec implementation
-      model <- gensim$models$fasttext$FastText(
-        size = dimensions,
-        window = window,
-        min_count = min_word_occur,
-        workers = numCores
-      )
-    }
-
-    model$build_vocab(sentences = corpus)
-
-    model$train(
-      sentences = corpus,
-      total_examples =  length(corpus),
-      epochs = epochs
-    )
-
-
-    cat("Saving ", embed_name, " embedding...\n")
-    # pickle version 4 compresses files more, but may cause problems
-    model$save(embed_path, pickle_protocol=4)
+    
+    cat("Creating ", embed_name, "embedding...\n")
+    source_python("1_creation/python/train_embedding.py")
+    train_embedding(embed_path, corpus_path, type, dimensions, min_word_occur, window, numCores, epochs)
 
   },
 

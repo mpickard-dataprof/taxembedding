@@ -4,7 +4,7 @@ source("1_creation/load_corpus.R")
 ##############################################################
 ##############################################################
 
-## NOTE: I'm wrapping the functions with "possibly()". Thus, if an error is
+## NOTE:  I'm wrapping the functions with "possibly()". Thus, if an error is
 ## encountered that line will be NULL. A little data loss is preferable to losing
 ## a whole run when processing the corpus.
 
@@ -24,7 +24,6 @@ tax_stopwords <- c(
   "subsection",
   "pub",
   "provided",
-  str_c(1:6200),
   "i",
   "ii",
   "iii",
@@ -531,7 +530,7 @@ preserve_ngrams_in_corpus <- function(lines) {
   assert_that(is_character(lines))
   
   # load list ngrams to preserve
-  tax_ngrams <- read_csv("ngrams_final_unique.csv")
+  tax_ngrams <- read_csv("../ngrams_final_unique.csv", show_col_types = FALSE)
 
   tax_ngrams <- tax_ngrams %>% 
     mutate(ngram = str_to_lower(ngram)) %>% 
@@ -588,11 +587,11 @@ create_ngram_regex <- function(df, ngram_size) {
 prepare_corpus <- function(corpus,
                         preserve_currency = TRUE,
                         preserve_percent = TRUE,
-                        preserve_ngrams = FALSE,
+                        preserve_ngrams = TRUE,
                         preserve_references = TRUE) {
 
   message("------------PREPARING CORPUS------------------") 
-  #corpus <- str_to_lower(corpus)
+  corpus <- str_to_lower(corpus)
   
   if (preserve_currency) {
     message("preserving currency references...")
@@ -622,14 +621,13 @@ prepare_corpus <- function(corpus,
 
 }
 
-tokenize_line_words <- function(lines, sw) {
-  assert_that(is_character(lines))
+tokenize_line_words <- function(line, sw) {
+  assert_that(is_character(line))
   
-  plan(multisession)
-  chr_vector <- future_map(lines, tokenize_words, 
-                               stopwords = sw, 
-                               strip_punct = TRUE, 
-                               strip_numeric = FALSE)
+  chr_vector <- tokenize_words(line, 
+                 stopwords = sw, 
+                 strip_punct = TRUE, 
+                 strip_numeric = FALSE)
   
   return(invisible(chr_vector))
 }
@@ -669,6 +667,8 @@ tokenize_corpus <- function(corpus,
     sw <- c(sw, tax_stopwords)
   }
   
+  plan(multisession)
+  
   if (stem_words) {
     # tokens <- tokenize_word_stems(corpus, stopwords = sw)
     tokens <- tokenize_line_word_stems(corpus, sw)
@@ -677,7 +677,10 @@ tokenize_corpus <- function(corpus,
     #                          stopwords = sw,
     #                          strip_punct = TRUE,
     #                          strip_numeric = TRUE)
-    tokens <- tokenize_line_words(corpus, sw)
+    tokens <- corpus %>% future_map(
+      tokenize_line_words,
+      stopwords = sw
+    )
     
   }
   
